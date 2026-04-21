@@ -6,6 +6,10 @@ import {
   FaFingerprint,
 } from "react-icons/fa";
 
+import {
+  startAuthentication,
+} from "@simplewebauthn/browser";
+
 import { loginUser } from "../../services/authService";
 import { useAuth } from "../../context/AuthContext";
 
@@ -20,7 +24,7 @@ export default function Login() {
 
   const [error, setError] = useState("");
 
-  // Handle Google Redirect Token
+  // Google Redirect Token
   useEffect(() => {
     const params = new URLSearchParams(
       window.location.search
@@ -55,10 +59,11 @@ export default function Login() {
       login(data);
 
       navigate("/home");
+
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Login failed"
+        "Login failed"
       );
     }
   };
@@ -69,6 +74,50 @@ export default function Login() {
       "http://localhost:5000/api/auth/google",
       "_self"
     );
+  };
+
+  // Passkey Login
+  const handlePasskeyLogin = async () => {
+    try {
+      const res = await fetch(
+        "http://localhost:5000/api/passkey/login/options",
+        {
+          method: "POST",
+        }
+      );
+
+      const options = await res.json();
+
+      await startAuthentication(options);
+
+      const verify = await fetch(
+        "http://localhost:5000/api/passkey/login/verify",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+          }),
+        }
+      );
+
+      const data = await verify.json();
+
+      localStorage.setItem(
+        "token",
+        data.token
+      );
+
+      login(data);
+
+      navigate("/home");
+
+    } catch (error) {
+      setError("Passkey login failed");
+    }
   };
 
   return (
@@ -109,6 +158,7 @@ export default function Login() {
           {/* Passkey */}
           <button
             type="button"
+            onClick={handlePasskeyLogin}
             className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-50"
           >
             <FaFingerprint />

@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaGoogle, FaFacebookF, FaFingerprint } from "react-icons/fa";
+import {
+  FaGoogle,
+  FaFacebookF,
+  FaFingerprint,
+} from "react-icons/fa";
 
 import { loginUser } from "../../services/authService";
 import { useAuth } from "../../context/AuthContext";
@@ -16,6 +20,24 @@ export default function Login() {
 
   const [error, setError] = useState("");
 
+  // Handle Google Redirect Token
+  useEffect(() => {
+    const params = new URLSearchParams(
+      window.location.search
+    );
+
+    const token = params.get("token");
+
+    if (token) {
+      localStorage.setItem("token", token);
+
+      login({ token });
+
+      navigate("/home");
+    }
+  }, [login, navigate]);
+
+  // Input Change
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -23,6 +45,7 @@ export default function Login() {
     });
   };
 
+  // Normal Login
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -32,18 +55,27 @@ export default function Login() {
       login(data);
 
       navigate("/home");
-
     } catch (err) {
       setError(
-        err.response?.data?.message || "Login failed"
+        err.response?.data?.message ||
+          "Login failed"
       );
     }
+  };
+
+  // Google Login
+  const handleGoogleLogin = () => {
+    window.open(
+      "http://localhost:5000/api/auth/google",
+      "_self"
+    );
   };
 
   return (
     <div className="min-h-screen bg-green-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
 
+        {/* Title */}
         <h1 className="text-3xl font-bold text-center text-green-600">
           FreshCart
         </h1>
@@ -52,29 +84,56 @@ export default function Login() {
           Sign in to continue shopping
         </p>
 
+        {/* Social Login */}
         <div className="mt-6 space-y-3">
 
-          <button type="button" className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-50">
-            <FaGoogle /> Continue with Google
+          {/* Google */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-200"
+          >
+            <FaGoogle />
+            Continue with Google
           </button>
 
-          <button type="button" className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-50">
-            <FaFacebookF /> Continue with Facebook
+          {/* Facebook */}
+          <button
+            type="button"
+            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-50"
+          >
+            <FaFacebookF />
+            Continue with Facebook
           </button>
 
-          <button type="button" className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-50">
-            <FaFingerprint /> Use Passkey
+          {/* Passkey */}
+          <button
+            type="button"
+            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-50"
+          >
+            <FaFingerprint />
+            Use Passkey
           </button>
 
         </div>
 
-        <div className="my-5 text-center text-gray-400">or</div>
+        {/* Divider */}
+        <div className="my-5 text-center text-gray-400">
+          or
+        </div>
 
+        {/* Error */}
         {error && (
-          <p className="text-red-500 text-sm mb-3">{error}</p>
+          <p className="text-red-500 text-sm mb-3">
+            {error}
+          </p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Normal Login */}
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
 
           <input
             type="email"
@@ -105,15 +164,22 @@ export default function Login() {
 
         </form>
 
+        {/* Links */}
         <p className="text-center mt-5 text-sm">
           Don't have an account?{" "}
-          <Link to="/register" className="text-green-600 font-semibold">
+          <Link
+            to="/register"
+            className="text-green-600 font-semibold"
+          >
             Sign up
           </Link>
         </p>
 
         <p className="text-center mt-3 text-sm">
-          <Link to="/admin/login" className="text-gray-600 hover:text-green-600">
+          <Link
+            to="/admin/login"
+            className="text-gray-600 hover:text-green-600"
+          >
             Admin Login
           </Link>
         </p>

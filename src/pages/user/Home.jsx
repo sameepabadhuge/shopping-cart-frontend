@@ -1,8 +1,11 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import CategoryCard from "../../components/CategoryCard";
 import ProductCard from "../../components/ProductCard";
-import { Link } from "react-router-dom";
 
 import {
   FaTruck,
@@ -13,41 +16,39 @@ import {
 } from "react-icons/fa";
 
 export default function Home() {
-  const categories = [
-    "Vegetables",
-    "Fruits",
-    "Bakery",
-    "Beverages",
-    "Snacks",
-    "Dairy",
-  ];
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
 
-  const products = [
-    {
-      name: "Fresh Tomatoes",
-      category: "Vegetables",
-      price: 450,
-      image: "https://images.unsplash.com/photo-1546094096-0df4bcaaa337",
-    },
-    {
-      name: "Red Apples",
-      category: "Fruits",
-      price: 890,
-      image: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce",
-    },
-    {
-      name: "Chocolate Cake",
-      category: "Bakery",
-      price: 1500,
-      image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587",
-    },
-    {
-      name: "Orange Juice",
-      category: "Beverages",
-      price: 650,
-      image: "https://images.unsplash.com/photo-1622597467836-f3285f2131b8",
-    },
-  ];
+  useEffect(() => {
+    fetchRecentProducts();
+    fetchCategories();
+  }, []);
+
+  // Fetch Recent Products
+  const fetchRecentProducts = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/products"
+      );
+
+      setProducts(res.data.slice(0, 10));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Fetch Categories
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/categories"
+      );
+
+      setCategories(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
@@ -123,24 +124,27 @@ export default function Home() {
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 mt-10">
-            {categories.map((item, index) => (
-              <CategoryCard key={index} name={item} />
+            {categories.map((item) => (
+              <CategoryCard
+                key={item._id}
+                name={item.name}
+              />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Products */}
+      {/* Recent Products */}
       <section className="bg-gray-50 px-4 md:px-6 py-14">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold">
-                Featured Products
+                Recent Products
               </h2>
 
               <p className="text-gray-500 mt-2">
-                Fresh handpicked products for you
+                Latest products added by admin
               </p>
             </div>
 
@@ -151,14 +155,19 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-            {products.map((item, index) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 mt-10">
+            {products.map((item) => (
               <ProductCard
-                key={index}
+                key={item._id}
+                id={item._id}
                 name={item.name}
                 category={item.category}
                 price={item.price}
-                image={item.image}
+                image={
+                  item.image
+                    ? `http://localhost:5000/uploads/${item.image}`
+                    : "https://via.placeholder.com/300"
+                }
               />
             ))}
           </div>

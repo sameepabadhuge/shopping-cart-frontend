@@ -11,12 +11,12 @@ import {
 
 export default function ManageProducts() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editId, setEditId] = useState(null);
-
   const [preview, setPreview] = useState("");
 
   const [form, setForm] = useState({
@@ -28,9 +28,9 @@ export default function ManageProducts() {
     image: null,
   });
 
-  /* =============================
-     Load Products
-  ============================= */
+  /* ===============================
+     LOAD PRODUCTS
+  =============================== */
   const loadProducts = async () => {
     try {
       const res = await axios.get(
@@ -42,38 +42,60 @@ export default function ManageProducts() {
     }
   };
 
+  /* ===============================
+     LOAD CATEGORIES
+  =============================== */
+  const loadCategories = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/categories"
+      );
+      setCategories(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  /* ===============================
+     USE EFFECT FIXED
+  =============================== */
   useEffect(() => {
-    loadProducts();
+    const fetchData = async () => {
+      await loadProducts();
+      await loadCategories();
+    };
+
+    fetchData();
   }, []);
 
-  /* =============================
-     Handle Input
-  ============================= */
+  /* ===============================
+     HANDLE INPUT CHANGE
+  =============================== */
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
     if (name === "image") {
       const file = files[0];
 
-      setForm({
-        ...form,
+      setForm((prev) => ({
+        ...prev,
         image: file,
-      });
+      }));
 
       if (file) {
         setPreview(URL.createObjectURL(file));
       }
     } else {
-      setForm({
-        ...form,
+      setForm((prev) => ({
+        ...prev,
         [name]: value,
-      });
+      }));
     }
   };
 
-  /* =============================
-     Open Add Modal
-  ============================= */
+  /* ===============================
+     OPEN ADD MODAL
+  =============================== */
   const openAddModal = () => {
     setIsEdit(false);
     setEditId(null);
@@ -91,9 +113,9 @@ export default function ManageProducts() {
     setShowModal(true);
   };
 
-  /* =============================
-     Open Edit Modal
-  ============================= */
+  /* ===============================
+     EDIT PRODUCT
+  =============================== */
   const handleEdit = (item) => {
     setIsEdit(true);
     setEditId(item._id);
@@ -116,9 +138,9 @@ export default function ManageProducts() {
     setShowModal(true);
   };
 
-  /* =============================
-     Add / Update Product
-  ============================= */
+  /* ===============================
+     SUBMIT FORM
+  =============================== */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -129,10 +151,7 @@ export default function ManageProducts() {
       data.append("category", form.category);
       data.append("price", form.price);
       data.append("stock", form.stock);
-      data.append(
-        "description",
-        form.description
-      );
+      data.append("description", form.description);
 
       if (form.image) {
         data.append("image", form.image);
@@ -150,16 +169,16 @@ export default function ManageProducts() {
         );
       }
 
-      loadProducts();
+      await loadProducts();
       setShowModal(false);
     } catch (error) {
       console.log(error);
     }
   };
 
-  /* =============================
-     Delete Product
-  ============================= */
+  /* ===============================
+     DELETE PRODUCT
+  =============================== */
   const handleDelete = async (id) => {
     const ok = window.confirm(
       "Delete this product?"
@@ -172,15 +191,15 @@ export default function ManageProducts() {
         `http://localhost:5000/api/products/${id}`
       );
 
-      loadProducts();
+      await loadProducts();
     } catch (error) {
       console.log(error);
     }
   };
 
-  /* =============================
-     Search
-  ============================= */
+  /* ===============================
+     SEARCH FILTER
+  =============================== */
   const filteredProducts = products.filter(
     (item) =>
       item.name
@@ -193,8 +212,10 @@ export default function ManageProducts() {
 
   return (
     <div className="p-4 sm:p-8 bg-[#f6f8f4] min-h-screen">
-      {/* Header */}
+
+      {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+
         <div>
           <h1 className="text-3xl sm:text-4xl font-bold">
             Products
@@ -214,7 +235,7 @@ export default function ManageProducts() {
         </button>
       </div>
 
-      {/* Search */}
+      {/* SEARCH */}
       <div className="bg-white rounded-2xl shadow-sm p-5 sm:p-6 mb-8">
         <div className="relative max-w-md">
           <FaSearch className="absolute left-4 top-3.5 text-gray-400" />
@@ -231,8 +252,9 @@ export default function ManageProducts() {
         </div>
       </div>
 
-      {/* Table */}
+      {/* TABLE */}
       <div className="bg-white rounded-2xl shadow-sm p-5 sm:p-6 overflow-x-auto">
+
         <h2 className="text-xl font-bold mb-5">
           All Products ({filteredProducts.length})
         </h2>
@@ -243,7 +265,7 @@ export default function ManageProducts() {
               <th className="pb-4">Image</th>
               <th>Name</th>
               <th>Category</th>
-              <th>Price</th>
+              <th>Unit Price</th>
               <th>Stock</th>
               <th className="text-right">
                 Actions
@@ -261,7 +283,7 @@ export default function ManageProducts() {
                   {item.image ? (
                     <img
                       src={`http://localhost:5000/uploads/${item.image}`}
-                      alt={item.name}
+                      alt=""
                       className="w-12 h-12 rounded-xl object-cover"
                     />
                   ) : (
@@ -271,11 +293,14 @@ export default function ManageProducts() {
 
                 <td>{item.name}</td>
                 <td>{item.category}</td>
-                <td>${item.price}</td>
+                <td className="font-medium">
+                  Rs. {item.price}
+                </td>
                 <td>{item.stock}</td>
 
                 <td>
                   <div className="flex justify-end gap-4">
+
                     <button
                       onClick={() =>
                         handleEdit(item)
@@ -293,41 +318,31 @@ export default function ManageProducts() {
                     >
                       <FaTrash />
                     </button>
+
                   </div>
                 </td>
               </tr>
             ))}
-
-            {filteredProducts.length ===
-              0 && (
-              <tr>
-                <td
-                  colSpan="6"
-                  className="text-center py-8 text-gray-400"
-                >
-                  No products found
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
 
-      {/* Modal */}
+      {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex justify-center items-center px-3">
+
           <div className="bg-white w-full max-w-md rounded-2xl p-6 relative shadow-2xl max-h-[92vh] overflow-y-auto">
-            {/* Close */}
+
+            {/* CLOSE */}
             <button
               onClick={() =>
                 setShowModal(false)
               }
-              className="absolute top-4 right-4 text-gray-500 hover:text-black"
+              className="absolute top-4 right-4 text-gray-500"
             >
               <FaTimes />
             </button>
 
-            {/* Title */}
             <h2 className="text-2xl font-bold mb-1">
               {isEdit
                 ? "Edit Product"
@@ -340,49 +355,61 @@ export default function ManageProducts() {
                 : "Create a new product"}
             </p>
 
-            {/* Form */}
             <form
               onSubmit={handleSubmit}
               className="space-y-4"
             >
-              {/* Name + Category */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium block mb-1">
-                    Name
-                  </label>
 
-                  <input
-                    type="text"
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    required
-                    className="w-full border rounded-xl px-4 py-2.5"
-                  />
-                </div>
+              {/* NAME */}
+              <div>
+                <label className="text-sm font-medium block mb-1">
+                  Product Name
+                </label>
 
-                <div>
-                  <label className="text-sm font-medium block mb-1">
-                    Category
-                  </label>
-
-                  <input
-                    type="text"
-                    name="category"
-                    value={form.category}
-                    onChange={handleChange}
-                    required
-                    className="w-full border rounded-xl px-4 py-2.5"
-                  />
-                </div>
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full border rounded-xl px-4 py-2.5"
+                />
               </div>
 
-              {/* Price + Stock */}
+              {/* CATEGORY */}
+              <div>
+                <label className="text-sm font-medium block mb-1">
+                  Category
+                </label>
+
+                <select
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
+                  required
+                  className="w-full border rounded-xl px-4 py-2.5 bg-white"
+                >
+                  <option value="">
+                    Select Category
+                  </option>
+
+                  {categories.map((cat) => (
+                    <option
+                      key={cat._id}
+                      value={cat.name}
+                    >
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* PRICE + STOCK */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
                 <div>
                   <label className="text-sm font-medium block mb-1">
-                    Price
+                    Unit Price (Rs.)
                   </label>
 
                   <input
@@ -409,9 +436,10 @@ export default function ManageProducts() {
                     className="w-full border rounded-xl px-4 py-2.5"
                   />
                 </div>
+
               </div>
 
-              {/* Description */}
+              {/* DESCRIPTION */}
               <div>
                 <label className="text-sm font-medium block mb-1">
                   Description
@@ -426,39 +454,42 @@ export default function ManageProducts() {
                 />
               </div>
 
-              {/* Image */}
+              {/* IMAGE */}
               <div>
                 <label className="text-sm font-medium block mb-2">
                   Image
                 </label>
 
                 <div className="flex items-center gap-3 flex-wrap">
+
                   <div className="w-14 h-14 rounded-xl bg-gray-100 overflow-hidden">
                     {preview && (
                       <img
                         src={preview}
-                        alt="Preview"
+                        alt=""
                         className="w-full h-full object-cover"
                       />
                     )}
                   </div>
 
-                  <label className="cursor-pointer border px-4 py-2 rounded-xl flex items-center gap-2 text-sm">
+                  <label className="cursor-pointer border px-4 py-2 rounded-xl flex gap-2 items-center text-sm">
                     <FaUpload />
                     Upload
 
                     <input
                       type="file"
-                      name="image"
                       hidden
+                      name="image"
                       onChange={handleChange}
                     />
                   </label>
+
                 </div>
               </div>
 
-              {/* Buttons */}
+              {/* BUTTONS */}
               <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+
                 <button
                   type="button"
                   onClick={() =>
@@ -469,12 +500,17 @@ export default function ManageProducts() {
                   Cancel
                 </button>
 
-                <button className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl">
+                <button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl"
+                >
                   {isEdit
                     ? "Update"
                     : "Add Product"}
                 </button>
+
               </div>
+
             </form>
           </div>
         </div>

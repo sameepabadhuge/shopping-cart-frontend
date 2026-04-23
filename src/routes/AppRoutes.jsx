@@ -14,7 +14,6 @@ import AdminLayout from "../layouts/AdminLayout";
 export default function AppRoutes() {
   return (
     <Routes>
-
       {/* Default */}
       <Route
         path="/"
@@ -23,13 +22,24 @@ export default function AppRoutes() {
 
       {/* User */}
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route
+        path="/register"
+        element={<Register />}
+      />
       <Route path="/home" element={<Home />} />
 
       {/* Admin Login */}
       <Route
         path="/admin/login"
         element={<AdminLogin />}
+      />
+
+      {/* Logout support route */}
+      <Route
+        path="/admin-login"
+        element={
+          <Navigate to="/admin/login" />
+        }
       />
 
       {/* Admin Pages */}
@@ -49,10 +59,17 @@ export default function AppRoutes() {
 
         <Route
           path="categories"
-          element={<ManageCategories />}
+          element={
+            <ManageCategories />
+          }
         />
       </Route>
 
+      {/* Not Found */}
+      <Route
+        path="*"
+        element={<Navigate to="/login" />}
+      />
     </Routes>
   );
 }

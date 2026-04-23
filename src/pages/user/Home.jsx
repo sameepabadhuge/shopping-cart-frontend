@@ -17,20 +17,14 @@ import {
 
 export default function Home() {
   const [products, setProducts] = useState([]);
-
-  const categories = [
-    "Vegetables",
-    "Fruits",
-    "Bakery",
-    "Beverages",
-    "Snacks",
-    "Dairy",
-  ];
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     fetchRecentProducts();
+    fetchCategories();
   }, []);
 
+  // Fetch Recent Products
   const fetchRecentProducts = async () => {
     try {
       const res = await axios.get(
@@ -38,6 +32,19 @@ export default function Home() {
       );
 
       setProducts(res.data.slice(0, 10));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Fetch Categories
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/categories"
+      );
+
+      setCategories(res.data);
     } catch (error) {
       console.log(error);
     }
@@ -117,8 +124,11 @@ export default function Home() {
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 mt-10">
-            {categories.map((item, index) => (
-              <CategoryCard key={index} name={item} />
+            {categories.map((item) => (
+              <CategoryCard
+                key={item._id}
+                name={item.name}
+              />
             ))}
           </div>
         </div>

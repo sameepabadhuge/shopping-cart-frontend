@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/user/Login";
 import Register from "../pages/user/Register";
 import Home from "../pages/user/Home";
+import Products from "../pages/user/Products";
+import ProductDetails from "../pages/user/ProductDetails";
 
 import AdminLogin from "../pages/admin/AdminLogin";
 import Dashboard from "../pages/admin/Dashboard";
@@ -27,6 +29,10 @@ export default function AppRoutes() {
         element={<Register />}
       />
       <Route path="/home" element={<Home />} />
+      <Route path="/products" element={<Products />} />
+      <Route path="/products/:id" element={<ProductDetails />} />
+
+    
 
       {/* Admin Login */}
       <Route

@@ -6,7 +6,7 @@ import {
   FaBoxOpen,
   FaTags,
   FaChartLine,
-  FaDollarSign,
+  FaMoneyBillWave,
 } from "react-icons/fa";
 
 export default function Dashboard() {
@@ -18,51 +18,77 @@ export default function Dashboard() {
     recentProducts: [],
   });
 
-  // Fetch dashboard data
-  const fetchDashboard = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:5000/api/dashboard"
-      );
+  /* =========================
+     Fetch Dashboard
+  ========================= */
+  const fetchDashboard =
+    async () => {
+      try {
+        const res =
+          await axios.get(
+            "http://localhost:5000/api/dashboard"
+          );
 
-      setStats(res.data);
-    } catch (error) {
-      console.log(
-        "Dashboard Error:",
-        error
-      );
-    }
-  };
-
-  // Load on page open
-  useEffect(() => {
-    const loadDashboard = async () => {
-      await fetchDashboard();
+        setStats(
+          res.data
+        );
+      } catch (error) {
+        console.log(
+          "Dashboard Error:",
+          error
+        );
+      }
     };
 
-    loadDashboard();
+  useEffect(() => {
+    const loadData =
+      async () => {
+        await fetchDashboard();
+      };
+
+    loadData();
   }, []);
+
+  /* =========================
+     Format Number
+  ========================= */
+  const formatPrice = (
+    value
+  ) => {
+    return Number(
+      value || 0
+    ).toLocaleString();
+  };
+
+  /* Show only 5 recent */
+  const recentItems =
+    stats.recentProducts.slice(
+      0,
+      5
+    );
 
   return (
     <div className="space-y-8">
 
       {/* Header */}
       <div>
-        <h1 className="text-5xl font-bold text-gray-900">
+        <h1 className="text-3xl sm:text-5xl font-bold text-gray-900">
           Dashboard
         </h1>
 
-        <p className="text-xl text-gray-500 mt-2">
+        <p className="text-base sm:text-xl text-gray-500 mt-2">
           Welcome to FreshCart Admin Panel
         </p>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
 
         <StatCard
           title="Total Products"
-          value={stats.totalProducts}
+          value={
+            stats.totalProducts
+          }
           subtitle="Products in catalog"
           icon={<FaBoxOpen />}
           bg="bg-green-100"
@@ -71,7 +97,9 @@ export default function Dashboard() {
 
         <StatCard
           title="Total Categories"
-          value={stats.totalCategories}
+          value={
+            stats.totalCategories
+          }
           subtitle="Product categories"
           icon={<FaTags />}
           bg="bg-yellow-100"
@@ -80,7 +108,9 @@ export default function Dashboard() {
 
         <StatCard
           title="Total Stock"
-          value={stats.totalStock}
+          value={
+            stats.totalStock
+          }
           subtitle="Items in inventory"
           icon={<FaChartLine />}
           bg="bg-orange-100"
@@ -89,9 +119,13 @@ export default function Dashboard() {
 
         <StatCard
           title="Inventory Value"
-          value={`$${stats.inventoryValue}`}
+          value={`Rs ${formatPrice(
+            stats.inventoryValue
+          )}`}
           subtitle="Total stock value"
-          icon={<FaDollarSign />}
+          icon={
+            <FaMoneyBillWave />
+          }
           bg="bg-red-100"
           color="text-red-600"
         />
@@ -99,47 +133,68 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Products */}
-      <div className="bg-white rounded-3xl p-8 border shadow-sm">
-        <h2 className="text-4xl font-bold mb-8">
-          Recent Products
-        </h2>
+      <div className="bg-white rounded-3xl p-5 sm:p-8 border shadow-sm">
+
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl sm:text-4xl font-bold">
+            Recent Products
+          </h2>
+
+          <span className="text-sm text-gray-400">
+            Latest 5 items
+          </span>
+        </div>
 
         <div className="space-y-4">
 
-          {stats.recentProducts.length >
+          {recentItems.length >
           0 ? (
-            stats.recentProducts.map(
-              (item) => (
+            recentItems.map(
+              (
+                item
+              ) => (
                 <div
-                  key={item._id}
-                  className="border rounded-2xl px-6 py-5 flex justify-between items-center"
+                  key={
+                    item._id
+                  }
+                  className="border rounded-2xl px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 hover:bg-gray-50 transition"
                 >
                   <div>
-                    <h3 className="text-2xl font-semibold">
-                      {item.name}
+                    <h3 className="text-lg sm:text-2xl font-semibold">
+                      {
+                        item.name
+                      }
                     </h3>
 
-                    <p className="text-gray-500 mt-1">
-                      {item.category}
+                    <p className="text-gray-500 text-sm sm:text-base mt-1">
+                      {
+                        item.category
+                      }
                     </p>
                   </div>
 
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-green-600">
-                      ${item.price}
+                  <div className="sm:text-right">
+                    <p className="text-xl sm:text-3xl font-bold text-green-600">
+                      Rs{" "}
+                      {formatPrice(
+                        item.price
+                      )}
                     </p>
 
-                    <p className="text-gray-400 mt-1">
-                      {item.stock} in stock
+                    <p className="text-gray-400 text-sm mt-1">
+                      {
+                        item.stock
+                      }{" "}
+                      in stock
                     </p>
                   </div>
                 </div>
               )
             )
           ) : (
-            <p className="text-gray-400">
+            <div className="border rounded-2xl px-6 py-8 text-center text-gray-400">
               No recent products found
-            </p>
+            </div>
           )}
 
         </div>

@@ -13,6 +13,8 @@ import ProductDetails from "../pages/user/ProductDetails";
 import Login from "../pages/user/Login";
 import Register from "../pages/user/Register";
 import Cart from "../pages/user/Cart";
+import Checkout from "../pages/user/Checkout";
+import OrderSuccess from "../pages/user/OrderSuccess";
 
 /* Admin Pages */
 import AdminLogin from "../pages/admin/AdminLogin";
@@ -112,7 +114,11 @@ export default function AppRoutes() {
             <Cart />
           </PrivateRoute>
         }
+
       />
+
+      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/order-success" element={<OrderSuccess />} />
 
       {/* ================= ADMIN LOGIN ================= */}
 

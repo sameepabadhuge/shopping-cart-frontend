@@ -96,14 +96,11 @@ export default function Checkout() {
   const total =
     subtotal + shipping;
 
-  const handleOrder =
-    () => {
-      alert(
-        "Order placed successfully!"
-      );
+  const handleOrder = async () => {
+  navigate("/order-success");
+  };
 
-      navigate("/");
-    };
+    
 
   return (
     <>

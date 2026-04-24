@@ -4,69 +4,66 @@ import {
 } from "react-router-dom";
 
 import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
   FaShoppingCart,
   FaUser,
   FaBars,
   FaTimes,
-  FaSignOutAlt,
-  FaBoxOpen,
 } from "react-icons/fa";
 
-import {
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
-
-import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const navigate =
     useNavigate();
 
-  const [menuOpen, setMenuOpen] =
-    useState(false);
+  const {
+    user,
+    logout,
+  } = useAuth();
 
-  const [profileOpen, setProfileOpen] =
+  const [menuOpen, setMenuOpen] =
     useState(false);
 
   const [cartCount, setCartCount] =
     useState(0);
 
-  const user = JSON.parse(
-    localStorage.getItem("user")
-  );
-
-  const loadCartCount = useCallback(
+  // Load cart count
+  const loadCartCount =
     async () => {
       try {
-        if (!user) {
+        if (!user?._id) {
           setCartCount(0);
           return;
         }
 
-        const res = await axios.get(
-          `http://localhost:5000/api/cart/${user._id}`
-        );
+        const res =
+          await fetch(
+            `http://localhost:5000/api/cart/${user._id}`
+          );
 
-        const items =
-          res.data.items || [];
+        const data =
+          await res.json();
 
         const totalQty =
-          items.reduce(
+          data.items?.reduce(
             (sum, item) =>
               sum + item.qty,
             0
-          );
+          ) || 0;
 
-        setCartCount(totalQty);
+        setCartCount(
+          totalQty
+        );
 
-      } catch (error) {
-        console.log(error);
+      } catch {
+        setCartCount(0);
       }
-    },
-    [user]
-  );
+    };
 
   useEffect(() => {
     loadCartCount();
@@ -82,25 +79,25 @@ export default function Navbar() {
         loadCartCount
       );
     };
-  }, [loadCartCount]);
+  }, [user]);
 
-  const handleLogout = () => {
-    localStorage.removeItem(
-      "user"
-    );
+  const handleLogout =
+    () => {
+      logout();
 
-    localStorage.removeItem(
-      "token"
-    );
+      localStorage.removeItem(
+        "pendingCart"
+      );
 
-    setProfileOpen(false);
+      localStorage.removeItem(
+        "redirectAfterLogin"
+      );
 
-    navigate("/");
-    window.location.reload();
-  };
+      navigate("/login");
+    };
 
   return (
-    <nav className="bg-white border-b shadow-sm sticky top-0 z-50">
+    <nav className="bg-white shadow-md sticky top-0 z-50">
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
 
@@ -113,7 +110,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-6 font-medium">
+        <div className="hidden md:flex items-center gap-6">
 
           <Link
             to="/"
@@ -126,7 +123,7 @@ export default function Navbar() {
             to="/products"
             className="hover:text-green-600"
           >
-            Shop
+            Products
           </Link>
 
           {/* Cart */}
@@ -136,78 +133,49 @@ export default function Navbar() {
           >
             <FaShoppingCart size={20} />
 
-            {cartCount > 0 && (
-              <span className="absolute -top-3 -right-3 bg-green-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+            {cartCount >
+              0 && (
+              <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 rounded-full">
                 {cartCount}
               </span>
             )}
           </Link>
 
-          {/* User */}
-          {!user ? (
-            <Link
-              to="/login"
-              className="hover:text-green-600"
-            >
-              <FaUser size={20} />
-            </Link>
-          ) : (
-            <div className="relative">
+          {/* Auth */}
+          {user ? (
+            <>
+              <span className="text-sm font-medium">
+                Hi,{" "}
+                {user.name}
+              </span>
 
               <button
-                onClick={() =>
-                  setProfileOpen(
-                    !profileOpen
-                  )
+                onClick={
+                  handleLogout
                 }
-                className="hover:text-green-600"
+                className="bg-red-500 text-white px-4 py-2 rounded-lg"
               >
-                <FaUser size={20} />
+                Logout
               </button>
-
-              {profileOpen && (
-                <div className="absolute right-0 mt-3 w-48 bg-white border rounded-xl shadow-lg p-2">
-
-                  <p className="px-3 py-2 text-sm font-semibold border-b">
-                    {user.name ||
-                      "My Account"}
-                  </p>
-
-                  <Link
-                    to="/orders"
-                    className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-lg"
-                    onClick={() =>
-                      setProfileOpen(
-                        false
-                      )
-                    }
-                  >
-                    <FaBoxOpen />
-                    My Orders
-                  </Link>
-
-                  <button
-                    onClick={
-                      handleLogout
-                    }
-                    className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-100 rounded-lg text-left text-red-500"
-                  >
-                    <FaSignOutAlt />
-                    Logout
-                  </button>
-
-                </div>
-              )}
-
-            </div>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              className="bg-green-600 text-white px-4 py-2 rounded-lg"
+            >
+              <FaUser className="inline mr-2" />
+              Login
+            </Link>
           )}
 
         </div>
 
-        {/* Mobile Button */}
+        {/* Mobile Menu Button */}
         <button
           onClick={() =>
-            setMenuOpen(!menuOpen)
+            setMenuOpen(
+              !menuOpen
+            )
           }
           className="md:hidden text-xl"
         >
@@ -217,17 +185,15 @@ export default function Navbar() {
             <FaBars />
           )}
         </button>
+
       </div>
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden border-t px-4 py-4 space-y-4 bg-white">
+        <div className="md:hidden px-4 pb-4 space-y-3">
 
           <Link
             to="/"
-            onClick={() =>
-              setMenuOpen(false)
-            }
             className="block"
           >
             Home
@@ -235,55 +201,44 @@ export default function Navbar() {
 
           <Link
             to="/products"
-            onClick={() =>
-              setMenuOpen(false)
-            }
             className="block"
           >
-            Shop
+            Products
           </Link>
 
           <Link
             to="/cart"
-            onClick={() =>
-              setMenuOpen(false)
-            }
             className="block"
           >
-            Cart ({cartCount})
+            Cart
+            {cartCount >
+              0 &&
+              ` (${cartCount})`}
           </Link>
 
-          {!user ? (
-            <Link
-              to="/login"
-              onClick={() =>
-                setMenuOpen(false)
-              }
-              className="block"
-            >
-              Login
-            </Link>
-          ) : (
+          {user ? (
             <>
-              <Link
-                to="/orders"
-                onClick={() =>
-                  setMenuOpen(false)
-                }
-                className="block"
-              >
-                My Orders
-              </Link>
+              <p>
+                Hi,{" "}
+                {user.name}
+              </p>
 
               <button
                 onClick={
                   handleLogout
                 }
-                className="block text-red-500"
+                className="bg-red-500 text-white px-4 py-2 rounded-lg w-full"
               >
                 Logout
               </button>
             </>
+          ) : (
+            <Link
+              to="/login"
+              className="block bg-green-600 text-white px-4 py-2 rounded-lg text-center"
+            >
+              Login
+            </Link>
           )}
 
         </div>

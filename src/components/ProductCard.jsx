@@ -4,14 +4,16 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import axios from "axios";
+import { useState } from "react";
 
 import {
   FaShoppingCart,
   FaStar,
 } from "react-icons/fa";
 
-import { useState } from "react";
+import axios from "../utils/axiosInstance";
+
+import { useAuth } from "../context/AuthContext";
 
 export default function ProductCard({
   id,
@@ -23,6 +25,8 @@ export default function ProductCard({
   const navigate = useNavigate();
   const location = useLocation();
 
+  const { user } = useAuth();
+
   const [loading, setLoading] =
     useState(false);
 
@@ -33,24 +37,13 @@ export default function ProductCard({
     e.preventDefault();
     e.stopPropagation();
 
-    const user = JSON.parse(
-      localStorage.getItem("user")
-    );
-
-    // ✅ FIXED CHECK
     if (!user || !user._id) {
-      setMessage(
-        "Please login first"
+      localStorage.setItem(
+        "redirectAfterLogin",
+        location.pathname
       );
 
-      setTimeout(() => {
-        navigate("/login", {
-          state: {
-            from: location,
-          },
-        });
-      }, 1200);
-
+      navigate("/login");
       return;
     }
 
@@ -58,13 +51,13 @@ export default function ProductCard({
       setLoading(true);
 
       await axios.post(
-        "http://localhost:5000/api/cart/add",
+        "/cart/add",
         {
           userId: user._id,
           product: {
             productId: id,
-            name: name,
-            price: price,
+            name,
+            price,
             image: image.replace(
               "http://localhost:5000/uploads/",
               ""
@@ -78,17 +71,9 @@ export default function ProductCard({
         new Event("cartUpdated")
       );
 
-      setMessage(
-        "Added to cart successfully!"
-      );
-
-      setTimeout(() => {
-        setMessage("");
-      }, 1500);
+      navigate("/cart");
 
     } catch (error) {
-      console.log(error);
-
       setMessage(
         "Something went wrong"
       );
@@ -98,7 +83,7 @@ export default function ProductCard({
   };
 
   return (
-    <div className="bg-white border rounded-2xl p-4 shadow-sm hover:shadow-xl transition">
+    <div className="bg-white border rounded-2xl p-4 shadow-sm">
 
       <Link to={`/products/${id}`}>
         <img
@@ -107,18 +92,16 @@ export default function ProductCard({
           className="w-full h-44 object-cover rounded-xl"
         />
 
-        <div className="mt-4">
-          <p className="text-sm text-gray-500">
-            {category}
-          </p>
+        <p className="text-sm text-gray-500 mt-4">
+          {category}
+        </p>
 
-          <h3 className="font-bold text-lg mt-1">
-            {name}
-          </h3>
-        </div>
+        <h3 className="font-bold text-lg">
+          {name}
+        </h3>
       </Link>
 
-      <div className="flex items-center gap-1 text-yellow-500 text-sm mt-2">
+      <div className="flex gap-1 text-yellow-500 mt-2">
         <FaStar />
         <FaStar />
         <FaStar />
@@ -133,9 +116,9 @@ export default function ProductCard({
       <button
         onClick={addToCart}
         disabled={loading}
-        className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl flex items-center justify-center gap-2"
+        className="w-full mt-4 bg-green-600 text-white py-2 rounded-xl"
       >
-        <FaShoppingCart />
+        <FaShoppingCart className="inline mr-2" />
 
         {loading
           ? "Adding..."
@@ -143,7 +126,7 @@ export default function ProductCard({
       </button>
 
       {message && (
-        <p className="text-sm text-center mt-3 text-green-600 font-medium">
+        <p className="text-red-500 text-sm mt-2 text-center">
           {message}
         </p>
       )}

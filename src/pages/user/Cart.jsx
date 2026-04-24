@@ -340,10 +340,14 @@ export default function Cart() {
                   </span>
                 </div>
 
-                <button className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700">
-                  Checkout
+                <button
+                onClick={() =>
+                   navigate("/checkout")
+                }
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl"
+                >
+                   Checkout
                 </button>
-
               </div>
 
             </div>

@@ -1,30 +1,82 @@
-import { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+} from "react";
 
-const AuthContext = createContext();
+const AuthContext =
+  createContext();
 
-export const AuthProvider = ({ children }) => {
-  const savedUser = JSON.parse(localStorage.getItem("user"));
+export const AuthProvider = ({
+  children,
+}) => {
+  const savedUser =
+    JSON.parse(
+      localStorage.getItem(
+        "user"
+      )
+    );
 
-  const [user, setUser] = useState(savedUser || null);
+  const [user, setUser] =
+    useState(
+      savedUser || null
+    );
 
-  // Save Login
   const login = (data) => {
-    localStorage.setItem("user", JSON.stringify(data));
-    setUser(data);
+    let userData = null;
+
+    if (
+      data.user &&
+      data.user._id
+    ) {
+      userData = {
+        ...data.user,
+        token:
+          data.token,
+      };
+    } else if (
+      data._id
+    ) {
+      userData = data;
+    } else {
+      userData = null;
+    }
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(
+        userData
+      )
+    );
+
+    setUser(
+      userData
+    );
   };
 
-  // Logout
   const logout = () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem(
+      "user"
+    );
+
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom Hook
-export const useAuth = () => useContext(AuthContext);
+export const useAuth =
+  () =>
+    useContext(
+      AuthContext
+    );

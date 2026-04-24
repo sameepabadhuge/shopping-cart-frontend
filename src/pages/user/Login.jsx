@@ -1,4 +1,8 @@
-import { useState, useEffect } from "react";
+import {
+  useState,
+  useEffect,
+} from "react";
+
 import {
   Link,
   useNavigate,
@@ -15,17 +19,31 @@ import {
   startAuthentication,
 } from "@simplewebauthn/browser";
 
-import { loginUser } from "../../services/authService";
-import { useAuth } from "../../context/AuthContext";
+import {
+  loginUser,
+} from "../../services/authService";
+
+import {
+  useAuth,
+} from "../../context/AuthContext";
 
 export default function Login() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate =
+    useNavigate();
 
-  const { login } = useAuth();
+  const location =
+    useLocation();
+
+  const { login } =
+    useAuth();
 
   const from =
-    location.state?.from?.pathname || "/";
+    localStorage.getItem(
+      "redirectAfterLogin"
+    ) ||
+    location.state?.from
+      ?.pathname ||
+    "/";
 
   const [formData, setFormData] =
     useState({
@@ -36,6 +54,7 @@ export default function Login() {
   const [error, setError] =
     useState("");
 
+  // Google Login Redirect
   useEffect(() => {
     const params =
       new URLSearchParams(
@@ -46,16 +65,30 @@ export default function Login() {
       params.get("token");
 
     if (token) {
+      const userData = {
+        token,
+      };
+
       localStorage.setItem(
-        "token",
-        token
+        "user",
+        JSON.stringify(userData)
       );
 
-      login({ token });
+      login(userData);
 
-      navigate(from);
+      localStorage.removeItem(
+        "redirectAfterLogin"
+      );
+
+      navigate(from, {
+        replace: true,
+      });
     }
-  }, [login, navigate, from]);
+  }, [
+    login,
+    navigate,
+    from,
+  ]);
 
   const handleChange = (e) => {
     setFormData({
@@ -65,28 +98,85 @@ export default function Login() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Normal Login
+  const handleSubmit =
+    async (e) => {
+      e.preventDefault();
 
-    try {
-      const data =
-        await loginUser(
-          formData
+      try {
+        const data =
+          await loginUser(
+            formData
+          );
+
+        login(data);
+
+        alert(
+          "Welcome back!"
         );
 
-      login(data);
+        // Pending cart item
+        const pending =
+          JSON.parse(
+            localStorage.getItem(
+              "pendingCart"
+            )
+          );
 
-      navigate(from);
+        if (pending) {
+          await fetch(
+            "http://localhost:5000/api/cart/add",
+            {
+              method:
+                "POST",
 
-    } catch (err) {
-      setError(
-        err.response?.data
-          ?.message ||
-          "Login failed"
-      );
-    }
-  };
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
 
+              body: JSON.stringify(
+                {
+                  userId:
+                    data.user
+                      ._id,
+
+                  product:
+                    pending,
+                }
+              ),
+            }
+          );
+
+          localStorage.removeItem(
+            "pendingCart"
+          );
+
+          window.dispatchEvent(
+            new Event(
+              "cartUpdated"
+            )
+          );
+        }
+
+        localStorage.removeItem(
+          "redirectAfterLogin"
+        );
+
+        navigate(from, {
+          replace: true,
+        });
+
+      } catch (err) {
+        setError(
+          err.response?.data
+            ?.message ||
+            "Login failed"
+        );
+      }
+    };
+
+  // Google
   const handleGoogleLogin =
     () => {
       window.open(
@@ -95,6 +185,7 @@ export default function Login() {
       );
     };
 
+  // Passkey
   const handlePasskeyLogin =
     async () => {
       try {
@@ -120,10 +211,12 @@ export default function Login() {
             {
               method:
                 "POST",
+
               headers: {
                 "Content-Type":
                   "application/json",
               },
+
               body: JSON.stringify(
                 {
                   email:
@@ -138,7 +231,17 @@ export default function Login() {
 
         login(data);
 
-        navigate(from);
+        alert(
+          "Welcome back!"
+        );
+
+        localStorage.removeItem(
+          "redirectAfterLogin"
+        );
+
+        navigate(from, {
+          replace: true,
+        });
 
       } catch {
         setError(
@@ -160,6 +263,7 @@ export default function Login() {
           Sign in to continue shopping
         </p>
 
+        {/* Social */}
         <div className="mt-6 space-y-3">
 
           <button
@@ -198,12 +302,14 @@ export default function Login() {
           or
         </div>
 
+        {/* Error */}
         {error && (
           <p className="text-red-500 text-sm mb-3">
             {error}
           </p>
         )}
 
+        {/* Form */}
         <form
           onSubmit={
             handleSubmit
@@ -241,7 +347,7 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-3 rounded-lg"
+            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"
           >
             Sign In
           </button>
@@ -249,12 +355,12 @@ export default function Login() {
         </form>
 
         <p className="text-center mt-5 text-sm">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             to="/register"
             className="text-green-600 font-semibold"
           >
-            Sign up
+            Sign Up
           </Link>
         </p>
 

@@ -1,4 +1,10 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext";
 
 /* User Pages */
 import Home from "../pages/user/Home";
@@ -17,49 +23,161 @@ import ManageCategories from "../pages/admin/ManageCategories";
 /* Layout */
 import AdminLayout from "../layouts/AdminLayout";
 
+/* =========================
+   Protected User Route
+========================= */
+function PrivateRoute({
+  children,
+}) {
+  const { user } =
+    useAuth();
+
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+/* =========================
+   Protected Admin Route
+========================= */
+function AdminRoute({
+  children,
+}) {
+  const { user } =
+    useAuth();
+
+  if (
+    !user ||
+    user.role !==
+      "admin"
+  ) {
+    return (
+      <Navigate
+        to="/admin/login"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
-      
-      <Route path="/" element={<Home />} />
-      <Route path="/products" element={<Products />} />
-      <Route path="/products/:id" element={<ProductDetails />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/cart" element={<Cart />} />
 
-      
-      <Route path="/admin/login" element={<AdminLogin />} />
+      {/* ================= USER ROUTES ================= */}
 
-      {/* Redirect old admin-login URL */}
+      <Route
+        path="/"
+        element={<Home />}
+      />
+
+      <Route
+        path="/products"
+        element={<Products />}
+      />
+
+      <Route
+        path="/products/:id"
+        element={
+          <ProductDetails />
+        }
+      />
+
+      <Route
+        path="/login"
+        element={<Login />}
+      />
+
+      <Route
+        path="/register"
+        element={
+          <Register />
+        }
+      />
+
+      {/* Protected Cart */}
+      <Route
+        path="/cart"
+        element={
+          <PrivateRoute>
+            <Cart />
+          </PrivateRoute>
+        }
+      />
+
+      {/* ================= ADMIN LOGIN ================= */}
+
+      <Route
+        path="/admin/login"
+        element={
+          <AdminLogin />
+        }
+      />
+
+      {/* Old URL Redirect */}
       <Route
         path="/admin-login"
-        element={<Navigate to="/admin/login" />}
+        element={
+          <Navigate
+            to="/admin/login"
+          />
+        }
       />
 
       {/* ================= ADMIN ROUTES ================= */}
-      <Route path="/admin" element={<AdminLayout />}>
+
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminLayout />
+          </AdminRoute>
+        }
+      >
+
         <Route
           path="dashboard"
-          element={<Dashboard />}
+          element={
+            <Dashboard />
+          }
         />
 
         <Route
           path="products"
-          element={<ManageProducts />}
+          element={
+            <ManageProducts />
+          }
         />
 
         <Route
           path="categories"
-          element={<ManageCategories />}
+          element={
+            <ManageCategories />
+          }
         />
+
       </Route>
 
       {/* ================= NOT FOUND ================= */}
+
       <Route
         path="*"
-        element={<Navigate to="/" />}
+        element={
+          <Navigate
+            to="/"
+          />
+        }
       />
+
     </Routes>
   );
 }

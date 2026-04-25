@@ -176,8 +176,15 @@ export default function Home() {
               <CategoryCard
                 key={item._id}
                 name={item.name}
+                image={
+                  item.image
+                    ? `http://localhost:5000/uploads/${item.image}`
+                    : ""
+                 }
               />
             ))}
+
+              
 
           </div>
 

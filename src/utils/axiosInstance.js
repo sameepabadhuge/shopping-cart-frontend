@@ -8,6 +8,7 @@ const axiosInstance =
   axios.create({
     baseURL:
       "http://localhost:5000/api",
+    withCredentials: true,
   });
 
 /* =========================
@@ -23,6 +24,7 @@ axiosInstance.interceptors.request.use(
         )
       );
 
+    // token inside user object
     if (user?.token) {
       config.headers.Authorization =
         `Bearer ${user.token}`;
@@ -30,6 +32,7 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
+
   (error) =>
     Promise.reject(error)
 );
@@ -43,12 +46,27 @@ axiosInstance.interceptors.response.use(
     response,
 
   (error) => {
+    const currentPath =
+      window.location.pathname;
+
+    const isLoginPage =
+      currentPath ===
+        "/login" ||
+      currentPath ===
+        "/admin/login";
+
+    // Safe redirect only outside login pages
     if (
       error.response?.status ===
-      401
+        401 &&
+      !isLoginPage
     ) {
       localStorage.removeItem(
         "user"
+      );
+
+      localStorage.removeItem(
+        "token"
       );
 
       window.location.href =

@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa";
 
 import { useAuth } from "../context/AuthContext";
+import axios from "../utils/axiosInstance";
 
 export default function Navbar() {
   const navigate =
@@ -32,7 +33,9 @@ export default function Navbar() {
   const [cartCount, setCartCount] =
     useState(0);
 
-  // Load cart count
+  /* =========================
+     LOAD CART COUNT
+  ========================= */
   const loadCartCount =
     async () => {
       try {
@@ -42,15 +45,12 @@ export default function Navbar() {
         }
 
         const res =
-          await fetch(
-            `http://localhost:5000/api/cart/${user._id}`
+          await axios.get(
+            `/cart/${user._id}`
           );
 
-        const data =
-          await res.json();
-
         const totalQty =
-          data.items?.reduce(
+          res.data.items?.reduce(
             (sum, item) =>
               sum + item.qty,
             0
@@ -60,11 +60,14 @@ export default function Navbar() {
           totalQty
         );
 
-      } catch {
+      } catch (error) {
         setCartCount(0);
       }
     };
 
+  /* =========================
+     EFFECT
+  ========================= */
   useEffect(() => {
     loadCartCount();
 
@@ -81,6 +84,9 @@ export default function Navbar() {
     };
   }, [user]);
 
+  /* =========================
+     LOGOUT
+  ========================= */
   const handleLogout =
     () => {
       logout();
@@ -135,25 +141,24 @@ export default function Navbar() {
 
             {cartCount >
               0 && (
-              <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 rounded-full">
+              <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 rounded-full min-w-[20px] text-center">
                 {cartCount}
               </span>
             )}
           </Link>
 
-          {/* Auth */}
+          {/* User */}
           {user ? (
             <>
               <span className="text-sm font-medium">
-                Hi,{" "}
-                {user.name}
+                Hi, {user.name}
               </span>
 
               <button
                 onClick={
                   handleLogout
                 }
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg"
               >
                 Logout
               </button>
@@ -161,7 +166,7 @@ export default function Navbar() {
           ) : (
             <Link
               to="/login"
-              className="bg-green-600 text-white px-4 py-2 rounded-lg"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
             >
               <FaUser className="inline mr-2" />
               Login
@@ -170,7 +175,7 @@ export default function Navbar() {
 
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu */}
         <button
           onClick={() =>
             setMenuOpen(
@@ -188,9 +193,9 @@ export default function Navbar() {
 
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Dropdown */}
       {menuOpen && (
-        <div className="md:hidden px-4 pb-4 space-y-3">
+        <div className="md:hidden px-4 pb-4 space-y-3 bg-white">
 
           <Link
             to="/"
@@ -219,8 +224,7 @@ export default function Navbar() {
           {user ? (
             <>
               <p>
-                Hi,{" "}
-                {user.name}
+                Hi, {user.name}
               </p>
 
               <button

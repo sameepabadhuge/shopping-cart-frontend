@@ -30,6 +30,9 @@ export default function Checkout() {
   const [loading, setLoading] =
     useState(true);
 
+  const [placingOrder, setPlacingOrder] =
+    useState(false);
+
   const [formData, setFormData] =
     useState({
       fullName: "",
@@ -96,11 +99,41 @@ export default function Checkout() {
   const total =
     subtotal + shipping;
 
-  const handleOrder = async () => {
-  navigate("/order-success");
-  };
+  const handleOrder =
+    async () => {
+      try {
+        setPlacingOrder(true);
 
-    
+        await axios.delete(
+          "/cart/clear",
+          {
+            data: {
+              userId:
+                user._id,
+            },
+          }
+        );
+
+        window.dispatchEvent(
+          new Event(
+            "cartUpdated"
+          )
+        );
+
+        navigate(
+          "/order-success"
+        );
+
+      } catch (error) {
+        console.log(error);
+        alert(
+          "Failed to place order"
+        );
+
+      } finally {
+        setPlacingOrder(false);
+      }
+    };
 
   return (
     <>
@@ -151,13 +184,13 @@ export default function Checkout() {
                     <input
                       type="text"
                       name="fullName"
-                      placeholder="John Doe"
                       value={
                         formData.fullName
                       }
                       onChange={
                         handleChange
                       }
+                      placeholder="John Doe"
                       className="w-full border rounded-xl pl-11 pr-4 py-3 outline-none focus:border-green-600"
                     />
                   </div>
@@ -175,13 +208,13 @@ export default function Checkout() {
                     <input
                       type="text"
                       name="phone"
-                      placeholder="+94 77 123 4567"
                       value={
                         formData.phone
                       }
                       onChange={
                         handleChange
                       }
+                      placeholder="+94 77 123 4567"
                       className="w-full border rounded-xl pl-11 pr-4 py-3 outline-none focus:border-green-600"
                     />
                   </div>
@@ -199,13 +232,13 @@ export default function Checkout() {
                     <textarea
                       rows="4"
                       name="address"
-                      placeholder="Enter your full delivery address"
                       value={
                         formData.address
                       }
                       onChange={
                         handleChange
                       }
+                      placeholder="Enter your full delivery address"
                       className="w-full border rounded-xl pl-11 pr-4 py-3 outline-none focus:border-green-600"
                     ></textarea>
                   </div>
@@ -222,13 +255,13 @@ export default function Checkout() {
                     <input
                       type="text"
                       name="city"
-                      placeholder="Colombo"
                       value={
                         formData.city
                       }
                       onChange={
                         handleChange
                       }
+                      placeholder="Colombo"
                       className="w-full border rounded-xl px-4 py-3 outline-none focus:border-green-600"
                     />
                   </div>
@@ -241,13 +274,13 @@ export default function Checkout() {
                     <input
                       type="text"
                       name="postalCode"
-                      placeholder="10100"
                       value={
                         formData.postalCode
                       }
                       onChange={
                         handleChange
                       }
+                      placeholder="10100"
                       className="w-full border rounded-xl px-4 py-3 outline-none focus:border-green-600"
                     />
                   </div>
@@ -297,11 +330,7 @@ export default function Checkout() {
                             </h3>
 
                             <p className="text-sm text-gray-500">
-                              Qty:
-                              {" "}
-                              {
-                                item.qty
-                              }
+                              Qty: {item.qty}
                             </p>
 
                           </div>
@@ -328,8 +357,7 @@ export default function Checkout() {
                       </span>
 
                       <span>
-                        Rs{" "}
-                        {subtotal}
+                        Rs {subtotal}
                       </span>
                     </div>
 
@@ -339,8 +367,7 @@ export default function Checkout() {
                       </span>
 
                       <span className="text-green-600">
-                        {shipping ===
-                        0
+                        {shipping === 0
                           ? "Free"
                           : `Rs ${shipping}`}
                       </span>
@@ -366,9 +393,14 @@ export default function Checkout() {
                     onClick={
                       handleOrder
                     }
+                    disabled={
+                      placingOrder
+                    }
                     className="w-full mt-8 bg-green-600 hover:bg-green-700 text-white py-4 rounded-xl font-semibold"
                   >
-                    Confirm Order
+                    {placingOrder
+                      ? "Processing..."
+                      : "Confirm Order"}
                   </button>
 
                   <p className="text-xs text-center text-gray-400 mt-4">

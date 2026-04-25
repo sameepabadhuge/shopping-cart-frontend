@@ -71,7 +71,17 @@ export default function ProductCard({
         new Event("cartUpdated")
       );
 
-      navigate("/cart");
+
+
+
+      setMessage("Added to cart");
+
+      window.dispatchEvent(
+      new Event("cartUpdated")
+      );
+
+
+
 
     } catch (error) {
       setMessage(

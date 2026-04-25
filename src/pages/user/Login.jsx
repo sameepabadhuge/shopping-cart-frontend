@@ -54,36 +54,69 @@ export default function Login() {
   const [error, setError] =
     useState("");
 
-  // Google Login Redirect
+  /* ===================================
+     UPDATED PART:
+     Google Login Redirect Fixed
+     Fetch full profile using token
+  =================================== */
   useEffect(() => {
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
+    const googleLogin =
+      async () => {
+        const params =
+          new URLSearchParams(
+            window.location.search
+          );
 
-    const token =
-      params.get("token");
+        const token =
+          params.get("token");
 
-    if (token) {
-      const userData = {
-        token,
+        if (token) {
+          try {
+            const res =
+              await fetch(
+                "http://localhost:5000/api/auth/profile",
+                {
+                  headers: {
+                    Authorization:
+                      `Bearer ${token}`,
+                  },
+                }
+              );
+
+            const profile =
+              await res.json();
+
+            const userData = {
+              ...profile,
+              token,
+            };
+
+            localStorage.setItem(
+              "user",
+              JSON.stringify(
+                userData
+              )
+            );
+
+            login(userData);
+
+            localStorage.removeItem(
+              "redirectAfterLogin"
+            );
+
+            navigate(from, {
+              replace: true,
+            });
+
+          } catch (error) {
+            setError(
+              "Google login failed"
+            );
+          }
+        }
       };
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(userData)
-      );
-
-      login(userData);
-
-      localStorage.removeItem(
-        "redirectAfterLogin"
-      );
-
-      navigate(from, {
-        replace: true,
-      });
-    }
+    googleLogin();
   }, [
     login,
     navigate,
@@ -98,7 +131,7 @@ export default function Login() {
     });
   };
 
-  // Normal Login
+  /* Normal Login */
   const handleSubmit =
     async (e) => {
       e.preventDefault();
@@ -115,7 +148,6 @@ export default function Login() {
           "Welcome back!"
         );
 
-        // Pending cart item
         const pending =
           JSON.parse(
             localStorage.getItem(
@@ -176,7 +208,7 @@ export default function Login() {
       }
     };
 
-  // Google
+  /* Google Login */
   const handleGoogleLogin =
     () => {
       window.open(
@@ -185,7 +217,7 @@ export default function Login() {
       );
     };
 
-  // Passkey
+  /* Passkey Login */
   const handlePasskeyLogin =
     async () => {
       try {
@@ -302,7 +334,6 @@ export default function Login() {
           or
         </div>
 
-        {/* Error */}
         {error && (
           <p className="text-red-500 text-sm mb-3">
             {error}

@@ -86,25 +86,11 @@ export default function Products() {
     <>
       <Navbar />
 
-      <section className="px-4 md:px-6 py-14">
+      <section className="px-4 md:px-6 py-10">
         <div className="max-w-7xl mx-auto">
 
-          {/* Heading */}
-          <h1 className="text-4xl md:text-5xl font-bold text-center">
-
-            {/* dynamic heading */}
-            {selectedCategory
-              ? `${selectedCategory} Products`
-              : "All Products"}
-
-          </h1>
-
-          <p className="text-gray-500 text-center mt-3">
-            Browse our fresh and quality products
-          </p>
-
           {/* Search */}
-          <div className="max-w-xl mx-auto mt-8">
+          <div className="max-w-2xl mx-auto mt-10">
             <input
               type="text"
               placeholder="Search products..."

@@ -6,7 +6,7 @@ import {
 
 import { useAuth } from "../context/AuthContext";
 
-/* User Pages */
+/* ================= USER PAGES ================= */
 import Home from "../pages/user/Home";
 import Products from "../pages/user/Products";
 import ProductDetails from "../pages/user/ProductDetails";
@@ -16,18 +16,22 @@ import Cart from "../pages/user/Cart";
 import Checkout from "../pages/user/Checkout";
 import OrderSuccess from "../pages/user/OrderSuccess";
 
-/* Admin Pages */
+/* Profile Pages */
+import Settings from "../pages/user/profile/Settings";
+import Security from "../pages/user/profile/Security";
+
+/* ================= ADMIN PAGES ================= */
 import AdminLogin from "../pages/admin/AdminLogin";
 import Dashboard from "../pages/admin/Dashboard";
 import ManageProducts from "../pages/admin/ManageProducts";
 import ManageCategories from "../pages/admin/ManageCategories";
 
-/* Layout */
+/* ================= LAYOUT ================= */
 import AdminLayout from "../layouts/AdminLayout";
 
-/* =========================
-   Protected User Route
-========================= */
+/* ==========================================
+   PRIVATE USER ROUTE
+========================================== */
 function PrivateRoute({
   children,
 }) {
@@ -46,9 +50,9 @@ function PrivateRoute({
   return children;
 }
 
-/* =========================
-   Protected Admin Route
-========================= */
+/* ==========================================
+   PRIVATE ADMIN ROUTE
+========================================== */
 function AdminRoute({
   children,
 }) {
@@ -71,10 +75,12 @@ function AdminRoute({
   return children;
 }
 
+/* ==========================================
+   APP ROUTES
+========================================== */
 export default function AppRoutes() {
   return (
     <Routes>
-
       {/* ================= USER ROUTES ================= */}
 
       <Route
@@ -106,7 +112,8 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Protected Cart */}
+      {/* ================= PROTECTED USER ================= */}
+
       <Route
         path="/cart"
         element={
@@ -114,11 +121,54 @@ export default function AppRoutes() {
             <Cart />
           </PrivateRoute>
         }
-
       />
 
-      <Route path="/checkout" element={<Checkout />} />
-      <Route path="/order-success" element={<OrderSuccess />} />
+      <Route
+        path="/checkout"
+        element={
+          <PrivateRoute>
+            <Checkout />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/order-success"
+        element={
+          <PrivateRoute>
+            <OrderSuccess />
+          </PrivateRoute>
+        }
+      />
+
+      {/* My Account -> Settings */}
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <Settings />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/profile/settings"
+        element={
+          <PrivateRoute>
+            <Settings />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Security */}
+      <Route
+        path="/profile/security"
+        element={
+          <PrivateRoute>
+            <Security />
+          </PrivateRoute>
+        }
+      />
 
       {/* ================= ADMIN LOGIN ================= */}
 
@@ -129,12 +179,12 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Old URL Redirect */}
       <Route
         path="/admin-login"
         element={
           <Navigate
             to="/admin/login"
+            replace
           />
         }
       />
@@ -149,7 +199,6 @@ export default function AppRoutes() {
           </AdminRoute>
         }
       >
-
         <Route
           path="dashboard"
           element={
@@ -170,7 +219,6 @@ export default function AppRoutes() {
             <ManageCategories />
           }
         />
-
       </Route>
 
       {/* ================= NOT FOUND ================= */}
@@ -180,10 +228,10 @@ export default function AppRoutes() {
         element={
           <Navigate
             to="/"
+            replace
           />
         }
       />
-
     </Routes>
   );
 }

@@ -1,14 +1,5 @@
-import {
-  useState,
-  useEffect,
-} from "react";
-
-import {
-  Link,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
-
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   FaGoogle,
   FaFacebookF,
@@ -19,46 +10,39 @@ import {
   startAuthentication,
 } from "@simplewebauthn/browser";
 
-import {
-  loginUser,
-} from "../../services/authService";
-
-import {
-  useAuth,
-} from "../../context/AuthContext";
+import axios from "../../utils/axiosInstance";
+import { loginUser } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
-  const navigate =
-    useNavigate();
-
-  const location =
-    useLocation();
-
-  const { login } =
-    useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
 
   const from =
-    localStorage.getItem(
-      "redirectAfterLogin"
-    ) ||
-    location.state?.from
-      ?.pathname ||
+    localStorage.getItem("redirectAfterLogin") ||
+    location.state?.from?.pathname ||
     "/";
 
-  const [formData, setFormData] =
-    useState({
-      email: "",
-      password: "",
-    });
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
   const [error, setError] =
     useState("");
 
-  /* ===================================
-     UPDATED PART:
-     Google Login Redirect Fixed
-     Fetch full profile using token
-  =================================== */
+  const [loading, setLoading] =
+    useState(false);
+
+  const [
+    passkeyLoading,
+    setPasskeyLoading,
+  ] = useState(false);
+
+  /* =========================
+     GOOGLE LOGIN
+  ========================= */
   useEffect(() => {
     const googleLogin =
       async () => {
@@ -68,51 +52,39 @@ export default function Login() {
           );
 
         const token =
-          params.get("token");
+          params.get(
+            "token"
+          );
 
-        if (token) {
-          try {
-            const res =
-              await fetch(
-                "http://localhost:5000/api/auth/profile",
-                {
-                  headers: {
-                    Authorization:
-                      `Bearer ${token}`,
-                  },
-                }
-              );
+        if (!token) return;
 
-            const profile =
-              await res.json();
-
-            const userData = {
-              ...profile,
-              token,
-            };
-
-            localStorage.setItem(
-              "user",
-              JSON.stringify(
-                userData
-              )
+        try {
+          const res =
+            await fetch(
+              "http://localhost:5000/api/auth/profile",
+              {
+                headers: {
+                  Authorization:
+                    `Bearer ${token}`,
+                },
+              }
             );
 
-            login(userData);
+          const profile =
+            await res.json();
 
-            localStorage.removeItem(
-              "redirectAfterLogin"
-            );
+          login({
+            ...profile,
+            token,
+          });
 
-            navigate(from, {
-              replace: true,
-            });
-
-          } catch (error) {
-            setError(
-              "Google login failed"
-            );
-          }
+          navigate(from, {
+            replace: true,
+          });
+        } catch {
+          setError(
+            "Google login failed"
+          );
         }
       };
 
@@ -123,20 +95,17 @@ export default function Login() {
     from,
   ]);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]:
-        e.target.value,
-    });
-  };
-
-  /* Normal Login */
+  /* =========================
+     EMAIL LOGIN
+  ========================= */
   const handleSubmit =
     async (e) => {
       e.preventDefault();
 
       try {
+        setLoading(true);
+        setError("");
+
         const data =
           await loginUser(
             formData
@@ -144,71 +113,23 @@ export default function Login() {
 
         login(data);
 
-        alert(
-          "Welcome back!"
-        );
-
-        const pending =
-          JSON.parse(
-            localStorage.getItem(
-              "pendingCart"
-            )
-          );
-
-        if (pending) {
-          await fetch(
-            "http://localhost:5000/api/cart/add",
-            {
-              method:
-                "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body: JSON.stringify(
-                {
-                  userId:
-                    data.user
-                      ._id,
-
-                  product:
-                    pending,
-                }
-              ),
-            }
-          );
-
-          localStorage.removeItem(
-            "pendingCart"
-          );
-
-          window.dispatchEvent(
-            new Event(
-              "cartUpdated"
-            )
-          );
-        }
-
-        localStorage.removeItem(
-          "redirectAfterLogin"
-        );
-
         navigate(from, {
           replace: true,
         });
-
       } catch (err) {
         setError(
           err.response?.data
             ?.message ||
             "Login failed"
         );
+      } finally {
+        setLoading(false);
       }
     };
 
-  /* Google Login */
+  /* =========================
+     GOOGLE BUTTON
+  ========================= */
   const handleGoogleLogin =
     () => {
       window.open(
@@ -217,77 +138,65 @@ export default function Login() {
       );
     };
 
-  /* Passkey Login */
+  /* =========================
+     PASSKEY LOGIN
+  ========================= */
   const handlePasskeyLogin =
     async () => {
       try {
-        const res =
-          await fetch(
-            "http://localhost:5000/api/passkey/login/options",
-            {
-              method:
-                "POST",
-            }
-          );
-
-        const options =
-          await res.json();
-
-        await startAuthentication(
-          options
+        setPasskeyLoading(
+          true
         );
 
-        const verify =
-          await fetch(
-            "http://localhost:5000/api/passkey/login/verify",
+        setError("");
+
+        const {
+          data: options,
+        } = await axios.post(
+          "/passkey/login/options"
+        );
+
+        // v13 FIX 🔥
+        const credential =
+          await startAuthentication(
             {
-              method:
-                "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body: JSON.stringify(
-                {
-                  email:
-                    formData.email,
-                }
-              ),
+              optionsJSON:
+                options,
             }
           );
 
-        const data =
-          await verify.json();
+        const {
+          data,
+        } = await axios.post(
+          "/passkey/login/verify",
+          {
+            credential,
+          }
+        );
 
         login(data);
-
-        alert(
-          "Welcome back!"
-        );
-
-        localStorage.removeItem(
-          "redirectAfterLogin"
-        );
 
         navigate(from, {
           replace: true,
         });
-
-      } catch {
+      } catch (err) {
         setError(
-          "Passkey login failed"
+          err.response?.data
+            ?.message ||
+            err.message ||
+            "Passkey login failed"
+        );
+      } finally {
+        setPasskeyLoading(
+          false
         );
       }
     };
 
   return (
     <div className="min-h-screen bg-green-50 flex items-center justify-center px-4">
-
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-
-        <h1 className="text-3xl font-bold text-center text-green-600">
+        <h1 className="text-4xl font-bold text-center text-green-600">
           FreshCart
         </h1>
 
@@ -295,9 +204,8 @@ export default function Login() {
           Sign in to continue shopping
         </p>
 
-        {/* Social */}
+        {/* Social Login */}
         <div className="mt-6 space-y-3">
-
           <button
             type="button"
             onClick={
@@ -322,71 +230,91 @@ export default function Login() {
             onClick={
               handlePasskeyLogin
             }
-            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2"
+            disabled={
+              passkeyLoading
+            }
+            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 disabled:opacity-60"
           >
             <FaFingerprint />
-            Use Passkey
-          </button>
 
+            {passkeyLoading
+              ? "Loading..."
+              : "Use Passkey"}
+          </button>
         </div>
 
         <div className="my-5 text-center text-gray-400">
           or
         </div>
 
+        {/* Error */}
         {error && (
-          <p className="text-red-500 text-sm mb-3">
+          <p className="text-red-500 mb-3 text-sm">
             {error}
           </p>
         )}
 
-        {/* Form */}
+        {/* Email Login */}
         <form
           onSubmit={
             handleSubmit
           }
           className="space-y-4"
         >
-
           <input
             type="email"
-            name="email"
             placeholder="Email Address"
+            className="w-full border rounded-lg px-4 py-3"
             value={
               formData.email
             }
-            onChange={
-              handleChange
+            onChange={(
+              e
+            ) =>
+              setFormData({
+                ...formData,
+                email:
+                  e.target
+                    .value,
+              })
             }
-            className="w-full border rounded-lg px-4 py-3"
-            required
           />
 
           <input
             type="password"
-            name="password"
             placeholder="Password"
+            className="w-full border rounded-lg px-4 py-3"
             value={
               formData.password
             }
-            onChange={
-              handleChange
+            onChange={(
+              e
+            ) =>
+              setFormData({
+                ...formData,
+                password:
+                  e.target
+                    .value,
+              })
             }
-            className="w-full border rounded-lg px-4 py-3"
-            required
           />
 
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700"
+            disabled={
+              loading
+            }
+            className="w-full bg-green-600 text-white py-3 rounded-lg disabled:opacity-60"
           >
-            Sign In
+            {loading
+              ? "Please wait..."
+              : "Sign In"}
           </button>
-
         </form>
 
         <p className="text-center mt-5 text-sm">
-          Don&apos;t have an account?{" "}
+          Don&apos;t have an
+          account?{" "}
           <Link
             to="/register"
             className="text-green-600 font-semibold"
@@ -394,7 +322,6 @@ export default function Login() {
             Sign Up
           </Link>
         </p>
-
       </div>
     </div>
   );

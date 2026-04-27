@@ -1,121 +1,69 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInstance";
 
 export default function AdminLogin() {
-  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-  const [formData, setFormData] =
-    useState({
-      email: "",
-      password: "",
-    });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [error, setError] =
-    useState("");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  /* =========================
-     INPUT CHANGE
-  ========================= */
   const handleChange = (e) => {
     setError("");
 
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
-  /* =========================
-     ADMIN LOGIN
-  ========================= */
-  const handleSubmit =
-    async (e) => {
-      e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-      if (loading) return;
+    if (loading) return;
 
-      try {
-        setLoading(true);
-        setError("");
+    try {
+      setLoading(true);
+      setError("");
 
-        const res =
-          await axios.post(
-            "/auth/admin-login",
-            {
-              email:
-                formData.email
-                  .toLowerCase()
-                  .trim(),
+      const res = await axios.post(
+        "/auth/admin-login",
+        {
+          email: formData.email.toLowerCase().trim(),
+          password: formData.password,
+        }
+      );
 
-              password:
-                formData.password,
-            }
-          );
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          ...res.data.user,
+          token: res.data.token,
+        })
+      );
 
-        console.log(
-          "Admin Login Response:",
-          res.data
-        );
+      window.location.href =
+        "/admin/dashboard";
 
-        /* Save User */
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...res.data.user,
-            token:
-              res.data.token,
-          })
-        );
-
-        /* Remove old token if exists */
-        localStorage.removeItem(
-          "token"
-        );
-
-        console.log(
-          "Saved User:",
-          localStorage.getItem(
-            "user"
-          )
-        );
-
-        /* Redirect */
-        navigate(
-          "/admin/dashboard"
-        );
-
-      } catch (err) {
-        console.log(
-          "Admin Login Error:",
-          err
-        );
-
-        setError(
-          err.response?.data
-            ?.message ||
-            "Admin login failed"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Admin login failed"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-
       <div className="bg-white rounded-3xl shadow-lg p-8 w-full max-w-md">
-
-        {/* Logo */}
         <div className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center text-3xl font-bold mx-auto">
           A
         </div>
 
-        {/* Title */}
         <h1 className="text-4xl font-bold text-center mt-6">
           Admin Portal
         </h1>
@@ -124,32 +72,23 @@ export default function AdminLogin() {
           Sign in to manage FreshCart
         </p>
 
-        {/* Error */}
         {error && (
-          <p className="text-red-500 text-center mt-4 text-sm">
+          <p className="text-red-500 text-center mt-4">
             {error}
           </p>
         )}
 
-        {/* Form */}
         <form
-          onSubmit={
-            handleSubmit
-          }
+          onSubmit={handleSubmit}
           className="space-y-5 mt-8"
         >
-
           <input
             type="email"
             name="email"
             placeholder="admin@freshcart.com"
-            value={
-              formData.email
-            }
-            onChange={
-              handleChange
-            }
-            className="w-full border rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-black"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full border rounded-xl px-4 py-4"
             required
           />
 
@@ -157,32 +96,23 @@ export default function AdminLogin() {
             type="password"
             name="password"
             placeholder="Password"
-            value={
-              formData.password
-            }
-            onChange={
-              handleChange
-            }
-            className="w-full border rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-black"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full border rounded-xl px-4 py-4"
             required
           />
 
           <button
             type="submit"
-            disabled={
-              loading
-            }
-            className="w-full bg-black text-white py-4 rounded-xl hover:bg-gray-800 transition disabled:opacity-60"
+            disabled={loading}
+            className="w-full bg-black text-white py-4 rounded-xl"
           >
             {loading
               ? "Signing In..."
               : "Sign In to Admin Panel"}
           </button>
-
         </form>
-
       </div>
-
     </div>
   );
 }

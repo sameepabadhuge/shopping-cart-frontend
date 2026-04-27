@@ -1,12 +1,6 @@
-import {
-  useState,
-} from "react";
-
-import {
-  useNavigate,
-} from "react-router-dom";
-
-import axios from "axios";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "../../utils/axiosInstance";
 
 export default function AdminLogin() {
   const navigate =
@@ -21,7 +15,12 @@ export default function AdminLogin() {
   const [error, setError] =
     useState("");
 
+  const [loading, setLoading] =
+    useState(false);
+
   const handleChange = (e) => {
+    setError("");
+
     setFormData({
       ...formData,
       [e.target.name]:
@@ -33,18 +32,36 @@ export default function AdminLogin() {
     async (e) => {
       e.preventDefault();
 
+      if (loading) return;
+
       try {
+        setLoading(true);
+        setError("");
+
         const res =
           await axios.post(
-            "http://localhost:5000/api/auth/admin-login",
-            formData
+            "/auth/admin-login",
+            {
+              email:
+                formData.email.trim(),
+              password:
+                formData.password,
+            }
           );
 
+        /* Save token inside user object */
         localStorage.setItem(
           "user",
-          JSON.stringify(
-            res.data.user
-          )
+          JSON.stringify({
+            ...res.data.user,
+            token:
+              res.data.token,
+          })
+        );
+
+        /* old token remove */
+        localStorage.removeItem(
+          "token"
         );
 
         navigate(
@@ -55,8 +72,10 @@ export default function AdminLogin() {
         setError(
           err.response?.data
             ?.message ||
-            "Login failed"
+            "Admin login failed"
         );
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -65,6 +84,7 @@ export default function AdminLogin() {
 
       <div className="bg-white rounded-3xl shadow-lg p-8 w-full max-w-md">
 
+        {/* Logo */}
         <div className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center text-3xl font-bold mx-auto">
           A
         </div>
@@ -120,9 +140,14 @@ export default function AdminLogin() {
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-4 rounded-xl"
+            disabled={
+              loading
+            }
+            className="w-full bg-black text-white py-4 rounded-xl hover:bg-gray-800 transition"
           >
-            Sign In to Admin Panel
+            {loading
+              ? "Signing In..."
+              : "Sign In to Admin Panel"}
           </button>
 
         </form>

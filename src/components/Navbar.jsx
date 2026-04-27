@@ -1,38 +1,35 @@
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
-
-import {
-  useEffect,
-  useState,
-} from "react";
-
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 import {
   FaShoppingCart,
   FaUser,
   FaBars,
   FaTimes,
+  FaChevronDown,
+  FaCog,
+  FaShieldAlt,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
 import { useAuth } from "../context/AuthContext";
+import axios from "../utils/axiosInstance";
 
 export default function Navbar() {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
-  const {
-    user,
-    logout,
-  } = useAuth();
+  const { user, logout } = useAuth();
 
-  const [menuOpen, setMenuOpen] =
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] =
     useState(false);
-
   const [cartCount, setCartCount] =
     useState(0);
 
-  // Load cart count
+  const dropdownRef = useRef(null);
+
+  /* =========================
+     LOAD CART COUNT
+  ========================= */
   const loadCartCount =
     async () => {
       try {
@@ -42,29 +39,26 @@ export default function Navbar() {
         }
 
         const res =
-          await fetch(
-            `http://localhost:5000/api/cart/${user._id}`
+          await axios.get(
+            `/cart/${user._id}`
           );
 
-        const data =
-          await res.json();
-
         const totalQty =
-          data.items?.reduce(
+          res.data.items?.reduce(
             (sum, item) =>
               sum + item.qty,
             0
           ) || 0;
 
-        setCartCount(
-          totalQty
-        );
-
+        setCartCount(totalQty);
       } catch {
         setCartCount(0);
       }
     };
 
+  /* =========================
+     EFFECT
+  ========================= */
   useEffect(() => {
     loadCartCount();
 
@@ -81,6 +75,37 @@ export default function Navbar() {
     };
   }, [user]);
 
+  /* =========================
+     CLOSE DROPDOWN OUTSIDE CLICK
+  ========================= */
+  useEffect(() => {
+    const handleClickOutside =
+      (event) => {
+        if (
+          dropdownRef.current &&
+          !dropdownRef.current.contains(
+            event.target
+          )
+        ) {
+          setAccountOpen(false);
+        }
+      };
+
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+
+    return () =>
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+  }, []);
+
+  /* =========================
+     LOGOUT
+  ========================= */
   const handleLogout =
     () => {
       logout();
@@ -98,9 +123,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
-
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
-
         {/* Logo */}
         <Link
           to="/"
@@ -111,7 +134,6 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6">
-
           <Link
             to="/"
             className="hover:text-green-600"
@@ -133,49 +155,92 @@ export default function Navbar() {
           >
             <FaShoppingCart size={20} />
 
-            {cartCount >
-              0 && (
-              <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 rounded-full">
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs px-1.5 rounded-full min-w-[20px] text-center">
                 {cartCount}
               </span>
             )}
           </Link>
 
-          {/* Auth */}
+          {/* Logged User */}
           {user ? (
-            <>
-              <span className="text-sm font-medium">
-                Hi,{" "}
-                {user.name}
-              </span>
-
+            <div
+              className="relative"
+              ref={dropdownRef}
+            >
               <button
-                onClick={
-                  handleLogout
+                onClick={() =>
+                  setAccountOpen(
+                    !accountOpen
+                  )
                 }
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                className="flex items-center gap-2 font-medium hover:text-green-600"
               >
-                Logout
+                <FaUser />
+                
+                <FaChevronDown size={12} />
               </button>
-            </>
+
+              {/* Dropdown */}
+              {accountOpen && (
+                <div className="absolute right-0 mt-3 w-56 bg-white border rounded-xl shadow-lg py-2">
+                  <div className="px-4 py-2 border-b text-sm text-gray-500">
+                    Hi, {user.name}
+                  </div>
+
+                  <Link
+                    to="/profile"
+                    onClick={() =>
+                      setAccountOpen(
+                        false
+                      )
+                    }
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100"
+                  >
+                    <FaCog />
+                    Settings
+                  </Link>
+
+                  <Link
+                    to="/profile/security"
+                    onClick={() =>
+                      setAccountOpen(
+                        false
+                      )
+                    }
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100"
+                  >
+                    <FaShieldAlt />
+                    Security
+                  </Link>
+
+                  <button
+                    onClick={
+                      handleLogout
+                    }
+                    className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600"
+                  >
+                    <FaSignOutAlt />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <Link
               to="/login"
-              className="bg-green-600 text-white px-4 py-2 rounded-lg"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
             >
               <FaUser className="inline mr-2" />
               Login
             </Link>
           )}
-
         </div>
 
         {/* Mobile Menu Button */}
         <button
           onClick={() =>
-            setMenuOpen(
-              !menuOpen
-            )
+            setMenuOpen(!menuOpen)
           }
           className="md:hidden text-xl"
         >
@@ -185,13 +250,11 @@ export default function Navbar() {
             <FaBars />
           )}
         </button>
-
       </div>
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden px-4 pb-4 space-y-3">
-
+        <div className="md:hidden px-4 pb-4 space-y-3 bg-white">
           <Link
             to="/"
             className="block"
@@ -211,17 +274,29 @@ export default function Navbar() {
             className="block"
           >
             Cart
-            {cartCount >
-              0 &&
+            {cartCount > 0 &&
               ` (${cartCount})`}
           </Link>
 
           {user ? (
             <>
-              <p>
-                Hi,{" "}
-                {user.name}
+              <p className="font-medium">
+                Hi, {user.name}
               </p>
+
+              <Link
+                to="/profile"
+                className="block"
+              >
+                Settings
+              </Link>
+
+              <Link
+                to="/profile/security"
+                className="block"
+              >
+                Security
+              </Link>
 
               <button
                 onClick={
@@ -240,10 +315,8 @@ export default function Navbar() {
               Login
             </Link>
           )}
-
         </div>
       )}
-
     </nav>
   );
 }

@@ -34,8 +34,8 @@ export default function Footer() {
 
           <ul className="space-y-2 text-gray-600 text-sm">
             <li>support@freshcart.com</li>
-            <li>+94 71 123 4567</li>
-            <li>Negombo, Sri Lanka</li>
+            <li>+94 70 225 6830</li>
+            <li>Colombo Sri Lanka</li>
           </ul>
         </div>
 

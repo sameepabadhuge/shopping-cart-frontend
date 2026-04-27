@@ -1,22 +1,21 @@
+
+
 import {
   Link,
   useLocation,
   useNavigate,
 } from "react-router-dom";
 
+import { useState } from "react";
+
 import {
-  FaReact,
+  FaBars,
+  FaTimes,
   FaTachometerAlt,
   FaBoxOpen,
   FaTags,
-  FaUsers,
-  FaShoppingCart,
   FaSignOutAlt,
-  FaBars,
-  FaTimes,
 } from "react-icons/fa";
-
-import { useState } from "react";
 
 export default function AdminSidebar() {
   const location = useLocation();
@@ -41,21 +40,12 @@ export default function AdminSidebar() {
       path: "/admin/categories",
       icon: <FaTags />,
     },
-    {
-      name: "Orders",
-      path: "/admin/orders",
-      icon: <FaShoppingCart />,
-    },
-    {
-      name: "Users",
-      path: "/admin/users",
-      icon: <FaUsers />,
-    },
   ];
 
-  /* =========================
-     LOGOUT
-  ========================= */
+  const closeMenu = () => {
+    setOpen(false);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -63,38 +53,27 @@ export default function AdminSidebar() {
     navigate("/admin-login");
   };
 
-  /* =========================
-     CLOSE MOBILE MENU
-  ========================= */
-  const closeMenu = () => {
-    setOpen(false);
-  };
-
   return (
     <>
-      {/* MOBILE TOPBAR */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b z-50 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="bg-green-600 text-white p-2 rounded-lg">
-            <FaReact />
-          </div>
+      {/* Mobile Topbar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b z-50 px-4 flex items-center justify-between">
 
-          <h1 className="text-xl font-bold">
-            FreshCart
-          </h1>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900">
+          FreshCart
+        </h1>
 
         <button
           onClick={() =>
             setOpen(true)
           }
-          className="text-xl text-gray-700"
+          className="text-2xl text-gray-700"
         >
           <FaBars />
         </button>
+
       </div>
 
-      {/* OVERLAY */}
+      {/* Overlay */}
       {open && (
         <div
           onClick={closeMenu}
@@ -102,9 +81,9 @@ export default function AdminSidebar() {
         ></div>
       )}
 
-      {/* SIDEBAR */}
-      <div
-        className={`fixed top-0 left-0 z-50 bg-white border-r min-h-screen w-72 flex flex-col justify-between transition-all duration-300
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 z-50 h-screen w-72 bg-white border-r flex flex-col justify-between transition-transform duration-300
         ${
           open
             ? "translate-x-0"
@@ -112,41 +91,36 @@ export default function AdminSidebar() {
         }
         lg:translate-x-0`}
       >
-        {/* TOP */}
+        {/* Top */}
         <div>
-          {/* LOGO */}
+
+          {/* Logo */}
           <div className="p-6 border-b">
-            <div className="flex items-center justify-between lg:justify-start">
-              <div className="flex items-center gap-3">
-                <div className="bg-green-600 text-white p-3 rounded-xl text-xl">
-                  <FaReact />
-                </div>
+            <div className="flex items-center justify-between">
 
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
-                    FreshCart
-                  </h1>
+              <div>
+                <h1 className="text-4xl font-bold text-gray-900">
+                  FreshCart
+                </h1>
 
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-lg font-medium">
-                    Admin
-                  </span>
-                </div>
+                <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-lg font-medium">
+                  Admin
+                </span>
               </div>
 
-              {/* CLOSE MOBILE */}
               <button
-                onClick={
-                  closeMenu
-                }
+                onClick={closeMenu}
                 className="lg:hidden text-xl text-gray-500"
               >
                 <FaTimes />
               </button>
+
             </div>
           </div>
 
-          {/* MENU */}
-          <div className="p-4 space-y-2">
+          {/* Menu */}
+          <nav className="p-4 space-y-2">
+
             {menuItems.map(
               (item) => {
                 const active =
@@ -183,11 +157,13 @@ export default function AdminSidebar() {
                 );
               }
             )}
-          </div>
+
+          </nav>
         </div>
 
-        {/* LOGOUT */}
+        {/* Bottom */}
         <div className="p-4 border-t">
+
           <button
             onClick={
               handleLogout
@@ -197,8 +173,9 @@ export default function AdminSidebar() {
             <FaSignOutAlt />
             Logout
           </button>
+
         </div>
-      </div>
+      </aside>
     </>
   );
 }

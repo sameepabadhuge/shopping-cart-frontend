@@ -12,7 +12,7 @@ import {
   FaLock,
   FaHeadset,
   FaLeaf,
-  FaArrowRight,
+  FaBoxOpen,
 } from "react-icons/fa";
 
 export default function Home() {
@@ -62,96 +62,141 @@ export default function Home() {
       <Navbar />
 
       {/* HERO */}
-      <section className="bg-gradient-to-r from-green-50 to-white px-4 md:px-6 py-16">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+      <section
+        className="relative bg-cover bg-center bg-no-repeat px-4 md:px-6 py-24"
+        style={{
+          backgroundImage:
+            "url('/images/5.avif')",
+        }}
+      >
 
-          {/* Left */}
-          <div>
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/60"></div>
 
-            <p className="text-green-600 font-semibold text-lg">
-              100% Fresh & Organic
-            </p>
+        <div className="relative max-w-7xl mx-auto">
 
-            <h1 className="text-5xl md:text-6xl font-bold leading-tight mt-4 text-gray-800">
-              Fresh Products <br />
-              Delivered Fast
+          <div className="max-w-2xl text-white">
+
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-md px-4 py-2 rounded-full text-sm font-medium mb-6">
+              <FaLeaf className="text-green-400" />
+              Fresh Daily Groceries
+            </div>
+
+            {/* Heading */}
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+              Fresh Groceries
+              <br />
+              Delivered
+              <span className="text-green-400">
+                {" "}Fast
+              </span>
             </h1>
 
-            <p className="text-gray-600 mt-5 text-lg leading-8">
-              Shop vegetables, fruits, bakery items and groceries delivered directly to your doorstep.
+            {/* Text */}
+            <p className="text-lg text-gray-200 mt-5 leading-8 max-w-xl">
+              Shop vegetables, fruits and essentials with quick delivery and trusted freshness every day.
             </p>
 
-            <div className="flex flex-wrap gap-4 mt-8">
-
+            {/* Button */}
+            <div className="mt-8">
               <Link to="/products">
-                <button className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-xl transition shadow-lg">
+                <button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-semibold transition">
                   Shop Now
                 </button>
               </Link>
+            </div>
 
-              <Link to="/products">
-                <button className="border px-8 py-4 rounded-xl hover:bg-white transition flex items-center gap-2">
-                  View Products <FaArrowRight />
-                </button>
-              </Link>
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4 mt-10 max-w-xl">
+
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
+                <h3 className="text-2xl font-bold text-green-400">
+                  5k+
+                </h3>
+
+                <p className="text-sm text-gray-200 mt-1">
+                  Orders
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
+                <h3 className="text-2xl font-bold text-green-400">
+                  99%
+                </h3>
+
+                <p className="text-sm text-gray-200 mt-1">
+                  Fresh Rate
+                </p>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
+                <h3 className="text-2xl font-bold text-green-400">
+                  24/7
+                </h3>
+
+                <p className="text-sm text-gray-200 mt-1">
+                  Support
+                </p>
+              </div>
 
             </div>
 
           </div>
 
-          {/* Right */}
-          <div>
-            <img
-              src="https://images.unsplash.com/photo-1542838132-92c53300491e"
-              alt="Fresh Grocery"
-              className="rounded-3xl shadow-2xl w-full h-[450px] object-cover"
-            />
-          </div>
-
         </div>
+
       </section>
 
       {/* FEATURES */}
       <section className="px-4 md:px-6 py-14">
         <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-          <div className="border rounded-2xl p-6 text-center hover:shadow-xl transition">
-            <FaLeaf className="mx-auto text-3xl text-green-600" />
+          <div className="border rounded-2xl p-6 bg-white hover:shadow-xl transition">
+            <FaLeaf className="text-3xl text-green-600" />
+
             <h3 className="font-bold text-xl mt-4">
               Fresh Products
             </h3>
+
             <p className="text-gray-500 mt-2">
-              Daily selected fresh groceries.
+              Daily selected quality groceries.
             </p>
           </div>
 
-          <div className="border rounded-2xl p-6 text-center hover:shadow-xl transition">
-            <FaTruck className="mx-auto text-3xl text-green-600" />
+          <div className="border rounded-2xl p-6 bg-white hover:shadow-xl transition">
+            <FaTruck className="text-3xl text-green-600" />
+
             <h3 className="font-bold text-xl mt-4">
               Fast Delivery
             </h3>
+
             <p className="text-gray-500 mt-2">
-              Fast and reliable doorstep delivery.
+              Quick doorstep delivery.
             </p>
           </div>
 
-          <div className="border rounded-2xl p-6 text-center hover:shadow-xl transition">
-            <FaLock className="mx-auto text-3xl text-green-600" />
+          <div className="border rounded-2xl p-6 bg-white hover:shadow-xl transition">
+            <FaLock className="text-3xl text-green-600" />
+
             <h3 className="font-bold text-xl mt-4">
-              Secure Payment
+              Safe Payment
             </h3>
+
             <p className="text-gray-500 mt-2">
-              Safe checkout every time.
+              Protected checkout process.
             </p>
           </div>
 
-          <div className="border rounded-2xl p-6 text-center hover:shadow-xl transition">
-            <FaHeadset className="mx-auto text-3xl text-green-600" />
+          <div className="border rounded-2xl p-6 bg-white hover:shadow-xl transition">
+            <FaHeadset className="text-3xl text-green-600" />
+
             <h3 className="font-bold text-xl mt-4">
-              24/7 Support
+              Support
             </h3>
+
             <p className="text-gray-500 mt-2">
-              Friendly support anytime.
+              Friendly customer help.
             </p>
           </div>
 
@@ -159,23 +204,30 @@ export default function Home() {
       </section>
 
       {/* CATEGORY */}
-      <section className="bg-gray-50 px-4 md:px-6 py-14">
+      <section className="bg-gray-50 px-4 md:px-6 py-16">
         <div className="max-w-7xl mx-auto">
 
-          <h2 className="text-4xl font-bold text-center">
-            Shop by Category
-          </h2>
+          <div className="text-center">
+            <h2 className="text-4xl font-bold">
+              Shop by Category
+            </h2>
 
-          <p className="text-gray-500 text-center mt-3">
-            Browse our fresh collections
-          </p>
+            <p className="text-gray-500 mt-3">
+              Browse products by category
+            </p>
+          </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5 mt-10">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mt-10">
 
             {categories.map((item) => (
               <CategoryCard
                 key={item._id}
                 name={item.name}
+                image={
+                  item.image
+                    ? `http://localhost:5000/uploads/${item.image}`
+                    : ""
+                }
               />
             ))}
 
@@ -185,7 +237,7 @@ export default function Home() {
       </section>
 
       {/* PRODUCTS */}
-      <section className="px-4 md:px-6 py-14">
+      <section className="px-4 md:px-6 py-16">
         <div className="max-w-7xl mx-auto">
 
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
@@ -196,12 +248,12 @@ export default function Home() {
               </h2>
 
               <p className="text-gray-500 mt-2">
-                Latest items added by admin
+                Latest items added
               </p>
             </div>
 
             <Link to="/products">
-              <button className="border px-6 py-3 rounded-xl hover:bg-gray-50 transition">
+              <button className="border hover:bg-gray-50 px-6 py-3 rounded-xl transition font-medium">
                 View All
               </button>
             </Link>
@@ -237,22 +289,31 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="px-4 md:px-6 py-16">
-        <div className="max-w-7xl mx-auto bg-green-600 rounded-3xl text-white text-center px-6 py-16 shadow-xl">
+      <section className="px-4 md:px-6 pb-16">
+        <div className="max-w-7xl mx-auto bg-green-600 rounded-3xl px-6 md:px-12 py-14 text-white shadow-xl">
 
-          <h2 className="text-4xl md:text-5xl font-bold">
-            Start Shopping Fresh Today
-          </h2>
+          <div className="grid md:grid-cols-2 gap-8 items-center">
 
-          <p className="mt-4 text-lg opacity-90">
-            Join thousands of happy customers and enjoy fresh groceries every day.
-          </p>
+            <div>
+              <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+                Start Shopping Today
+              </h2>
 
-          <Link to="/products">
-            <button className="mt-8 bg-white text-green-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition">
-              Explore Products
-            </button>
-          </Link>
+              <p className="mt-4 text-white/90 text-lg">
+                Fresh groceries delivered quickly.
+              </p>
+            </div>
+
+            <div className="flex md:justify-end">
+              <Link to="/products">
+                <button className="bg-white text-green-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-semibold flex items-center gap-2 transition">
+                  <FaBoxOpen />
+                  Explore Products
+                </button>
+              </Link>
+            </div>
+
+          </div>
 
         </div>
       </section>

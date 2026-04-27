@@ -18,6 +18,9 @@ export default function AdminLogin() {
   const [loading, setLoading] =
     useState(false);
 
+  /* =========================
+     INPUT CHANGE
+  ========================= */
   const handleChange = (e) => {
     setError("");
 
@@ -28,6 +31,9 @@ export default function AdminLogin() {
     });
   };
 
+  /* =========================
+     ADMIN LOGIN
+  ========================= */
   const handleSubmit =
     async (e) => {
       e.preventDefault();
@@ -40,16 +46,19 @@ export default function AdminLogin() {
 
         const res =
           await axios.post(
-            "/api/auth/admin-login",
+            "/auth/admin-login",
             {
               email:
-                formData.email.trim(),
+                formData.email
+                  .toLowerCase()
+                  .trim(),
+
               password:
                 formData.password,
             }
           );
 
-        /* Save token inside user object */
+        /* Save user + token */
         localStorage.setItem(
           "user",
           JSON.stringify({
@@ -59,11 +68,12 @@ export default function AdminLogin() {
           })
         );
 
-        /* old token remove */
+        /* Remove old token */
         localStorage.removeItem(
           "token"
         );
 
+        /* Redirect */
         navigate(
           "/admin/dashboard"
         );
@@ -89,6 +99,7 @@ export default function AdminLogin() {
           A
         </div>
 
+        {/* Title */}
         <h1 className="text-4xl font-bold text-center mt-6">
           Admin Portal
         </h1>
@@ -97,12 +108,14 @@ export default function AdminLogin() {
           Sign in to manage FreshCart
         </p>
 
+        {/* Error */}
         {error && (
-          <p className="text-red-500 text-center mt-4">
+          <p className="text-red-500 text-center mt-4 text-sm">
             {error}
           </p>
         )}
 
+        {/* Form */}
         <form
           onSubmit={
             handleSubmit
@@ -120,7 +133,7 @@ export default function AdminLogin() {
             onChange={
               handleChange
             }
-            className="w-full border rounded-xl px-4 py-4"
+            className="w-full border rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-black"
             required
           />
 
@@ -134,7 +147,7 @@ export default function AdminLogin() {
             onChange={
               handleChange
             }
-            className="w-full border rounded-xl px-4 py-4"
+            className="w-full border rounded-xl px-4 py-4 outline-none focus:ring-2 focus:ring-black"
             required
           />
 
@@ -143,7 +156,7 @@ export default function AdminLogin() {
             disabled={
               loading
             }
-            className="w-full bg-black text-white py-4 rounded-xl hover:bg-gray-800 transition"
+            className="w-full bg-black text-white py-4 rounded-xl hover:bg-gray-800 transition disabled:opacity-60"
           >
             {loading
               ? "Signing In..."

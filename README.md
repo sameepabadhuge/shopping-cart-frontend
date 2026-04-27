@@ -1,5 +1,7 @@
 # Shopping Cart Frontend
 
+project deployed link: https://shopping-cart-frontend-psi.vercel.app/
+
 This is the React user interface for the shopping cart application. It lets users browse products, view details, manage cart items, and access authentication flows. It also includes the admin interface for managing products and categories.
 
 ## Features

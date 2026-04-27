@@ -1,3 +1,5 @@
+// src/context/AuthContext.jsx
+
 import {
   createContext,
   useContext,
@@ -12,26 +14,24 @@ export const AuthProvider = ({
   children,
 }) => {
   /* =========================
-     SAFE LOAD SAVED USER
+     LOAD USER FROM STORAGE
   ========================= */
-  let savedUser =
-    null;
-
-  try {
-    savedUser =
-      JSON.parse(
-        localStorage.getItem(
-          "user"
-        )
-      );
-  } catch {
-    savedUser =
-      null;
-  }
+  const getSavedUser =
+    () => {
+      try {
+        return JSON.parse(
+          localStorage.getItem(
+            "user"
+          )
+        );
+      } catch {
+        return null;
+      }
+    };
 
   const [user, setUser] =
     useState(
-      savedUser || null
+      getSavedUser()
     );
 
   const [loading,
@@ -45,7 +45,7 @@ export const AuthProvider = ({
     let userData =
       null;
 
-    /* Backend:
+    /* Backend returns:
        {
          user:{},
          token:""
@@ -53,7 +53,7 @@ export const AuthProvider = ({
     */
     if (
       data?.user &&
-      data.user._id
+      data?.token
     ) {
       userData = {
         ...data.user,
@@ -62,7 +62,7 @@ export const AuthProvider = ({
       };
     }
 
-    /* Direct User Object */
+    /* Direct object */
     else if (
       data?._id
     ) {
@@ -70,16 +70,18 @@ export const AuthProvider = ({
         data;
     }
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify(
-        userData
-      )
-    );
+    if (userData) {
+      localStorage.setItem(
+        "user",
+        JSON.stringify(
+          userData
+        )
+      );
 
-    setUser(
-      userData
-    );
+      setUser(
+        userData
+      );
+    }
   };
 
   /* =========================
@@ -87,7 +89,7 @@ export const AuthProvider = ({
   ========================= */
   const updateUser =
     (newData) => {
-      const updatedUser =
+      const updated =
         {
           ...(user ||
             {}),
@@ -97,12 +99,12 @@ export const AuthProvider = ({
       localStorage.setItem(
         "user",
         JSON.stringify(
-          updatedUser
+          updated
         )
       );
 
       setUser(
-        updatedUser
+        updated
       );
     };
 
@@ -130,27 +132,14 @@ export const AuthProvider = ({
   };
 
   /* =========================
-     AUTO SYNC TABS
+     SYNC MULTIPLE TABS
   ========================= */
   useEffect(() => {
     const syncUser =
       () => {
-        try {
-          const saved =
-            JSON.parse(
-              localStorage.getItem(
-                "user"
-              )
-            );
-
-          setUser(
-            saved
-          );
-        } catch {
-          setUser(
-            null
-          );
-        }
+        setUser(
+          getSavedUser()
+        );
       };
 
     window.addEventListener(

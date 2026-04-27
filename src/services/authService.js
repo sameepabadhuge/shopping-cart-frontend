@@ -1,7 +1,12 @@
-import axios from "axios";
+// src/services/authService.js
 
+import axios from "../utils/axiosInstance";
+
+/* =========================
+   BASE ROUTE
+========================= */
 const API =
-   `${import.meta.env.VITE_API_URL}/auth`;
+  "/auth";
 
 /* =========================
    USER REGISTER
@@ -50,24 +55,9 @@ export const loginAdmin =
 ========================= */
 export const getProfile =
   async () => {
-    const user =
-      JSON.parse(
-        localStorage.getItem(
-          "user"
-        )
-      );
-
-    const token =
-      user?.token;
-
     const res =
       await axios.get(
-        `${API}/profile`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `${API}/profile`
       );
 
     return res.data;

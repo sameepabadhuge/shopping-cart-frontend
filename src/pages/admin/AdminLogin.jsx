@@ -40,7 +40,7 @@ export default function AdminLogin() {
 
         const res =
           await axios.post(
-            "/auth/admin-login",
+            "/api/auth/admin-login",
             {
               email:
                 formData.email.trim(),

@@ -59,7 +59,7 @@ export default function ProductCard({
             name,
             price,
             image: image.replace(
-              "http://localhost:5000/uploads/",
+              `${import.meta.env.VITE_API_URL.replace("/api","")}/uploads/`,
               ""
             ),
             qty: 1,
@@ -67,12 +67,7 @@ export default function ProductCard({
         }
       );
 
-      window.dispatchEvent(
-        new Event("cartUpdated")
-      );
-
-
-
+     
 
       setMessage("Added to cart");
 

@@ -83,7 +83,7 @@ export default function Register() {
   const handleGoogleRegister =
     () => {
       window.open(
-        "http://localhost:5000/api/auth/google",
+        `${import.meta.env.VITE_API_URL}/auth/google`,
         "_self"
       );
     };
@@ -94,7 +94,7 @@ export default function Register() {
   const handleFacebookRegister =
     () => {
       window.open(
-        "http://localhost:5000/api/auth/facebook",
+        `${import.meta.env.VITE_API_URL}/auth/facebook`,
         "_self"
       );
     };

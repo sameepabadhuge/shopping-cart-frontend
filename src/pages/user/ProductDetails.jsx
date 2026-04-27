@@ -164,7 +164,7 @@ export default function ProductDetails() {
           {/* Image */}
           <div>
             <img
-              src={`http://localhost:5000/uploads/${product.image}`}
+              src={`${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${product.image}`}
               alt={product.name}
               className="w-full h-[500px] object-cover rounded-3xl shadow-lg"
             />

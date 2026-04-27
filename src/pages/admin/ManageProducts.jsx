@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import axios from "../../utils/axiosInstance";
 import {
   FaPlus,
   FaSearch,
@@ -11,12 +11,21 @@ import {
 } from "react-icons/fa";
 
 export default function ManageProducts() {
-  const API = "http://localhost:5000/api";
+  const imageBase =
+    import.meta.env.VITE_API_URL.replace(
+      "/api",
+      ""
+    );
 
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [products, setProducts] =
+    useState([]);
 
-  const [search, setSearch] = useState("");
+  const [categories, setCategories] =
+    useState([]);
+
+  const [search, setSearch] =
+    useState("");
+
   const [filterCategory, setFilterCategory] =
     useState("");
 
@@ -32,63 +41,77 @@ export default function ManageProducts() {
   const [preview, setPreview] =
     useState("");
 
-  const [form, setForm] = useState({
-    name: "",
-    category: "",
-    price: "",
-    stock: "",
-    description: "",
-    image: null,
-  });
+  const [form, setForm] =
+    useState({
+      name: "",
+      category: "",
+      price: "",
+      stock: "",
+      description: "",
+      image: null,
+    });
 
   /* ===============================
      Initial Load
   =============================== */
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productRes, categoryRes] =
-          await Promise.all([
-            axios.get(`${API}/products`),
-            axios.get(`${API}/categories`),
-          ]);
-
-        setProducts(productRes.data || []);
-        setCategories(
-          categoryRes.data || []
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     fetchData();
   }, []);
 
-  /* ===============================
-     Reload Products
-  =============================== */
-  const loadProducts = async () => {
+  const fetchData = async () => {
     try {
-      const res = await axios.get(
-        `${API}/products`
+      const [
+        productRes,
+        categoryRes,
+      ] = await Promise.all([
+        axios.get("/products"),
+        axios.get("/categories"),
+      ]);
+
+      setProducts(
+        productRes.data || []
       );
 
-      setProducts(res.data || []);
+      setCategories(
+        categoryRes.data || []
+      );
     } catch (error) {
       console.log(error);
     }
   };
 
   /* ===============================
+     Reload Products
+  =============================== */
+  const loadProducts =
+    async () => {
+      try {
+        const res =
+          await axios.get(
+            "/products"
+          );
+
+        setProducts(
+          res.data || []
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+  /* ===============================
      Input Change
   =============================== */
   const handleChange = (e) => {
-    const { name, value, files } =
-      e.target;
+    const {
+      name,
+      value,
+      files,
+    } = e.target;
 
     if (name === "image") {
-      const file = files?.[0] || null;
+      const file =
+        files?.[0] || null;
 
       setForm((prev) => ({
         ...prev,
@@ -97,7 +120,9 @@ export default function ManageProducts() {
 
       if (file) {
         setPreview(
-          URL.createObjectURL(file)
+          URL.createObjectURL(
+            file
+          )
         );
       }
     } else {
@@ -131,24 +156,30 @@ export default function ManageProducts() {
   /* ===============================
      Open Edit Modal
   =============================== */
-  const openEditModal = (item) => {
+  const openEditModal = (
+    item
+  ) => {
     setIsEdit(true);
     setEditId(item._id);
 
     setForm({
-      name: item.name || "",
+      name:
+        item.name || "",
       category:
         item.category || "",
-      price: item.price || "",
-      stock: item.stock || "",
+      price:
+        item.price || "",
+      stock:
+        item.stock || "",
       description:
-        item.description || "",
+        item.description ||
+        "",
       image: null,
     });
 
     setPreview(
       item.image
-        ? `http://localhost:5000/uploads/${item.image}`
+        ? `${imageBase}/uploads/${item.image}`
         : ""
     );
 
@@ -158,70 +189,87 @@ export default function ManageProducts() {
   /* ===============================
      Submit
   =============================== */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit =
+    async (e) => {
+      e.preventDefault();
 
-    try {
-      const data = new FormData();
+      try {
+        const data =
+          new FormData();
 
-      data.append("name", form.name);
-      data.append(
-        "category",
-        form.category
-      );
-      data.append("price", form.price);
-      data.append("stock", form.stock);
-      data.append(
-        "description",
-        form.description
-      );
-
-      if (form.image) {
         data.append(
-          "image",
-          form.image
+          "name",
+          form.name
         );
-      }
 
-      if (isEdit) {
-        await axios.put(
-          `${API}/products/${editId}`,
-          data
+        data.append(
+          "category",
+          form.category
         );
-      } else {
-        await axios.post(
-          `${API}/products`,
-          data
-        );
-      }
 
-      await loadProducts();
-      setShowModal(false);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+        data.append(
+          "price",
+          form.price
+        );
+
+        data.append(
+          "stock",
+          form.stock
+        );
+
+        data.append(
+          "description",
+          form.description
+        );
+
+        if (form.image) {
+          data.append(
+            "image",
+            form.image
+          );
+        }
+
+        if (isEdit) {
+          await axios.put(
+            `/products/${editId}`,
+            data
+          );
+        } else {
+          await axios.post(
+            "/products",
+            data
+          );
+        }
+
+        await loadProducts();
+        setShowModal(false);
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
   /* ===============================
      Delete
   =============================== */
-  const handleDelete = async (id) => {
-    const ok = window.confirm(
-      "Delete this product?"
-    );
+  const handleDelete =
+    async (id) => {
+      const ok =
+        window.confirm(
+          "Delete this product?"
+        );
 
-    if (!ok) return;
+      if (!ok) return;
 
-    try {
-      await axios.delete(
-        `${API}/products/${id}`
-      );
+      try {
+        await axios.delete(
+          `/products/${id}`
+        );
 
-      await loadProducts();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+        await loadProducts();
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
   /* ===============================
      Filtered Products
@@ -239,7 +287,8 @@ export default function ManageProducts() {
             );
 
           const matchCategory =
-            filterCategory === ""
+            filterCategory ===
+            ""
               ? true
               : item.category ===
                 filterCategory;
@@ -262,6 +311,7 @@ export default function ManageProducts() {
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold">
               Products
@@ -273,7 +323,9 @@ export default function ManageProducts() {
           </div>
 
           <button
-            onClick={openAddModal}
+            onClick={
+              openAddModal
+            }
             className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl flex items-center gap-2"
           >
             <FaPlus />
@@ -291,9 +343,12 @@ export default function ManageProducts() {
               type="text"
               placeholder="Search products..."
               value={search}
-              onChange={(e) =>
+              onChange={(
+                e
+              ) =>
                 setSearch(
-                  e.target.value
+                  e.target
+                    .value
                 )
               }
               className="w-full border rounded-xl pl-11 pr-4 py-3"
@@ -307,9 +362,12 @@ export default function ManageProducts() {
               value={
                 filterCategory
               }
-              onChange={(e) =>
+              onChange={(
+                e
+              ) =>
                 setFilterCategory(
-                  e.target.value
+                  e.target
+                    .value
                 )
               }
               className="w-full border rounded-xl pl-11 pr-4 py-3 bg-white"
@@ -321,10 +379,16 @@ export default function ManageProducts() {
               {categories.map(
                 (cat) => (
                   <option
-                    key={cat._id}
-                    value={cat.name}
+                    key={
+                      cat._id
+                    }
+                    value={
+                      cat.name
+                    }
                   >
-                    {cat.name}
+                    {
+                      cat.name
+                    }
                   </option>
                 )
               )}
@@ -350,7 +414,9 @@ export default function ManageProducts() {
                   Image
                 </th>
                 <th>Name</th>
-                <th>Category</th>
+                <th>
+                  Category
+                </th>
                 <th>Price</th>
                 <th>Stock</th>
                 <th className="text-right">
@@ -373,7 +439,7 @@ export default function ManageProducts() {
                       <td className="py-4">
                         {item.image ? (
                           <img
-                            src={`http://localhost:5000/uploads/${item.image}`}
+                            src={`${imageBase}/uploads/${item.image}`}
                             alt={
                               item.name
                             }
@@ -385,7 +451,9 @@ export default function ManageProducts() {
                       </td>
 
                       <td>
-                        {item.name}
+                        {
+                          item.name
+                        }
                       </td>
 
                       <td>
@@ -488,7 +556,9 @@ export default function ManageProducts() {
                   type="text"
                   name="name"
                   placeholder="Product Name"
-                  value={form.name}
+                  value={
+                    form.name
+                  }
                   onChange={
                     handleChange
                   }

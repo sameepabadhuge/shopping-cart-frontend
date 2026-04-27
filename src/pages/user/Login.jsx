@@ -73,7 +73,7 @@ export default function Login() {
         try {
           const res =
             await fetch(
-              "http://localhost:5000/api/auth/profile",
+              `${import.meta.env.VITE_API_URL}/auth/profile`,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -150,7 +150,7 @@ export default function Login() {
   const handleGoogleLogin =
     () => {
       window.open(
-        "http://localhost:5000/api/auth/google",
+        `${import.meta.env.VITE_API_URL}/auth/google`,
         "_self"
       );
     };
@@ -161,7 +161,7 @@ export default function Login() {
   const handleFacebookLogin =
     () => {
       window.open(
-        "http://localhost:5000/api/auth/facebook",
+        `${import.meta.env.VITE_API_URL}/auth/facebook`,
         "_self"
       );
     };

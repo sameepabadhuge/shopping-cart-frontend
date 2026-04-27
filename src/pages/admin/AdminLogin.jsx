@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInstance";
 
 export default function AdminLogin() {
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
   const [formData, setFormData] =
     useState({
@@ -58,7 +57,12 @@ export default function AdminLogin() {
             }
           );
 
-        /* Save user + token */
+        console.log(
+          "Admin Login Response:",
+          res.data
+        );
+
+        /* Save User */
         localStorage.setItem(
           "user",
           JSON.stringify({
@@ -68,9 +72,16 @@ export default function AdminLogin() {
           })
         );
 
-        /* Remove old token */
+        /* Remove old token if exists */
         localStorage.removeItem(
           "token"
+        );
+
+        console.log(
+          "Saved User:",
+          localStorage.getItem(
+            "user"
+          )
         );
 
         /* Redirect */
@@ -79,6 +90,11 @@ export default function AdminLogin() {
         );
 
       } catch (err) {
+        console.log(
+          "Admin Login Error:",
+          err
+        );
+
         setError(
           err.response?.data
             ?.message ||

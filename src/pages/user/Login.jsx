@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+
 import {
   FaGoogle,
   FaFacebookF,
@@ -15,19 +20,28 @@ import { loginUser } from "../../services/authService";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { login } = useAuth();
+  const navigate =
+    useNavigate();
+
+  const location =
+    useLocation();
+
+  const { login } =
+    useAuth();
 
   const from =
-    localStorage.getItem("redirectAfterLogin") ||
-    location.state?.from?.pathname ||
+    localStorage.getItem(
+      "redirectAfterLogin"
+    ) ||
+    location.state?.from
+      ?.pathname ||
     "/";
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] =
+    useState({
+      email: "",
+      password: "",
+    });
 
   const [error, setError] =
     useState("");
@@ -41,10 +55,10 @@ export default function Login() {
   ] = useState(false);
 
   /* =========================
-     GOOGLE LOGIN
+     GOOGLE + FACEBOOK TOKEN LOGIN
   ========================= */
   useEffect(() => {
-    const googleLogin =
+    const socialLogin =
       async () => {
         const params =
           new URLSearchParams(
@@ -52,9 +66,7 @@ export default function Login() {
           );
 
         const token =
-          params.get(
-            "token"
-          );
+          params.get("token");
 
         if (!token) return;
 
@@ -64,8 +76,7 @@ export default function Login() {
               "http://localhost:5000/api/auth/profile",
               {
                 headers: {
-                  Authorization:
-                    `Bearer ${token}`,
+                  Authorization: `Bearer ${token}`,
                 },
               }
             );
@@ -78,17 +89,23 @@ export default function Login() {
             token,
           });
 
+          window.history.replaceState(
+            {},
+            document.title,
+            "/login"
+          );
+
           navigate(from, {
             replace: true,
           });
         } catch {
           setError(
-            "Google login failed"
+            "Social login failed"
           );
         }
       };
 
-    googleLogin();
+    socialLogin();
   }, [
     login,
     navigate,
@@ -128,12 +145,23 @@ export default function Login() {
     };
 
   /* =========================
-     GOOGLE BUTTON
+     GOOGLE LOGIN
   ========================= */
   const handleGoogleLogin =
     () => {
       window.open(
         "http://localhost:5000/api/auth/google",
+        "_self"
+      );
+    };
+
+  /* =========================
+     FACEBOOK LOGIN
+  ========================= */
+  const handleFacebookLogin =
+    () => {
+      window.open(
+        "http://localhost:5000/api/auth/facebook",
         "_self"
       );
     };
@@ -156,7 +184,6 @@ export default function Login() {
           "/passkey/login/options"
         );
 
-        // v13 FIX 🔥
         const credential =
           await startAuthentication(
             {
@@ -201,30 +228,37 @@ export default function Login() {
         </h1>
 
         <p className="text-center text-gray-500 mt-2">
-          Sign in to continue shopping
+          Sign in to continue
+          shopping
         </p>
 
         {/* Social Login */}
         <div className="mt-6 space-y-3">
+          {/* Google */}
           <button
             type="button"
             onClick={
               handleGoogleLogin
             }
-            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2"
+            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-gray-50 transition"
           >
             <FaGoogle />
             Continue with Google
           </button>
 
+          {/* Facebook */}
           <button
             type="button"
-            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2"
+            onClick={
+              handleFacebookLogin
+            }
+            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 hover:bg-blue-50 transition"
           >
             <FaFacebookF />
             Continue with Facebook
           </button>
 
+          {/* Passkey */}
           <button
             type="button"
             onClick={
@@ -233,7 +267,7 @@ export default function Login() {
             disabled={
               passkeyLoading
             }
-            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full border rounded-lg py-3 flex items-center justify-center gap-2 disabled:opacity-60 hover:bg-gray-50 transition"
           >
             <FaFingerprint />
 
@@ -249,7 +283,7 @@ export default function Login() {
 
         {/* Error */}
         {error && (
-          <p className="text-red-500 mb-3 text-sm">
+          <p className="text-red-500 mb-3 text-sm text-center">
             {error}
           </p>
         )}
@@ -304,7 +338,7 @@ export default function Login() {
             disabled={
               loading
             }
-            className="w-full bg-green-600 text-white py-3 rounded-lg disabled:opacity-60"
+            className="w-full bg-green-600 text-white py-3 rounded-lg disabled:opacity-60 hover:bg-green-700 transition"
           >
             {loading
               ? "Please wait..."

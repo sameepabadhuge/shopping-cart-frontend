@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../../utils/axiosInstance";
 import {
   FaPlus,
   FaSearch,
@@ -24,36 +24,24 @@ export default function ManageCategories() {
     image: null,
   });
 
+  const imageBase =
+    import.meta.env.VITE_API_URL.replace("/api", "");
+
   /* ===============================
      Load Categories
   =============================== */
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:5000/api/categories"
-        );
-
-        setCategories(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    loadCategories();
-  }, []);
-
   const loadCategories = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/categories"
-      );
-
+      const res = await axios.get("/categories");
       setCategories(res.data);
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
   /* ===============================
      Input Change
@@ -110,7 +98,7 @@ export default function ManageCategories() {
 
     setPreview(
       item.image
-        ? `http://localhost:5000/uploads/${item.image}`
+        ? `${imageBase}/uploads/${item.image}`
         : ""
     );
 
@@ -134,12 +122,12 @@ export default function ManageCategories() {
 
       if (isEdit) {
         await axios.put(
-          `http://localhost:5000/api/categories/${editId}`,
+          `/categories/${editId}`,
           data
         );
       } else {
         await axios.post(
-          "http://localhost:5000/api/categories",
+          "/categories",
           data
         );
       }
@@ -163,7 +151,7 @@ export default function ManageCategories() {
 
     try {
       await axios.delete(
-        `http://localhost:5000/api/categories/${id}`
+        `/categories/${id}`
       );
 
       await loadCategories();
@@ -253,7 +241,7 @@ export default function ManageCategories() {
                   <td className="py-4">
                     {item.image ? (
                       <img
-                        src={`http://localhost:5000/uploads/${item.image}`}
+                        src={`${imageBase}/uploads/${item.image}`}
                         alt={item.name}
                         className="w-12 h-12 rounded-full object-cover"
                       />

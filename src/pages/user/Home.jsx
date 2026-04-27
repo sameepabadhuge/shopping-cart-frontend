@@ -33,12 +33,12 @@ export default function Home() {
     try {
       const productRes =
         await axios.get(
-          "http://localhost:5000/api/products"
+          `${import.meta.env.VITE_API_URL}/products`
         );
 
       const categoryRes =
         await axios.get(
-          "http://localhost:5000/api/categories"
+          `${import.meta.env.VITE_API_URL}/categories`
         );
 
       setProducts(
@@ -225,7 +225,7 @@ export default function Home() {
                 name={item.name}
                 image={
                   item.image
-                    ? `http://localhost:5000/uploads/${item.image}`
+                    ? `${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${item.image}`
                     : ""
                 }
               />
@@ -276,7 +276,7 @@ export default function Home() {
                   price={item.price}
                   image={
                     item.image
-                      ? `http://localhost:5000/uploads/${item.image}`
+                      ? `${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${item.image}`
                       : "https://via.placeholder.com/300"
                   }
                 />

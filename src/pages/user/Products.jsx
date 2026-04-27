@@ -42,7 +42,7 @@ export default function Products() {
       try {
         const res =
           await axios.get(
-            "http://localhost:5000/api/products"
+            `${import.meta.env.VITE_API_URL}/products`
           );
 
         setProducts(
@@ -133,7 +133,7 @@ export default function Products() {
                       price={
                         item.price
                       }
-                      image={`http://localhost:5000/uploads/${item.image}`}
+                      image={`${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${item.image}`}
                     />
                   )
                 )

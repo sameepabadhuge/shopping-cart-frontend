@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInstance";
 
 export default function AdminLogin() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -60,6 +63,14 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white rounded-3xl shadow-lg p-8 w-full max-w-md">
+        <button
+          type="button"
+          onClick={() => navigate("/login")}
+          className="text-sm font-semibold text-gray-600 hover:text-black transition-colors"
+        >
+          ← Back to Login
+        </button>
+
         <div className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center text-3xl font-bold mx-auto">
           A
         </div>

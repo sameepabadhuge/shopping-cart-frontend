@@ -9,6 +9,7 @@ import {
   FaGoogle,
   FaFacebookF,
   FaFingerprint,
+  FaUserShield,
 } from "react-icons/fa";
 
 import {
@@ -228,8 +229,7 @@ export default function Login() {
         </h1>
 
         <p className="text-center text-gray-500 mt-2">
-          Sign in to continue
-          shopping
+          Sign in to continue shopping
         </p>
 
         {/* Social Login */}
@@ -346,6 +346,7 @@ export default function Login() {
           </button>
         </form>
 
+        {/* Register */}
         <p className="text-center mt-5 text-sm">
           Don&apos;t have an
           account?{" "}
@@ -356,6 +357,17 @@ export default function Login() {
             Sign Up
           </Link>
         </p>
+
+        {/* Admin Login */}
+        <div className="text-center mt-4">
+          <Link
+            to="/admin/login"
+            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-red-600 transition"
+          >
+            <FaUserShield />
+            Admin Login
+          </Link>
+        </div>
       </div>
     </div>
   );

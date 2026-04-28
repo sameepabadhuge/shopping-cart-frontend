@@ -1,156 +1,139 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-
 import {
-  useLocation, 
+  Link,
+  useNavigate,
+  useLocation,
 } from "react-router-dom";
 
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
-import ProductCard from "../../components/ProductCard";
+import { useState } from "react";
 
-export default function Products() {
-  const [products, setProducts] =
-    useState([]);
+import {
+  FaShoppingCart,
+  FaStar,
+} from "react-icons/fa";
 
-  const [search, setSearch] =
-    useState("");
+import axios from "../utils/axiosInstance";
+
+import { useAuth } from "../context/AuthContext";
+
+export default function ProductCard({
+  id,
+  name,
+  category,
+  price,
+  image,
+}) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { user } = useAuth();
 
   const [loading, setLoading] =
-    useState(true);
+    useState(false);
 
-  const location =
-    useLocation(); 
+  const [message, setMessage] =
+    useState("");
 
-  
-  // read category from URL
-  // example /products?category=Juice
-  const params =
-    new URLSearchParams(
-      location.search
-    );
+  const addToCart = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-  const selectedCategory =
-    params.get("category");
+    if (!user || !user._id) {
+      localStorage.setItem(
+        "redirectAfterLogin",
+        location.pathname
+      );
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+      navigate("/login");
+      return;
+    }
 
-  const fetchProducts =
-    async () => {
-      try {
-        const res =
-          await axios.get(
-            `${import.meta.env.VITE_API_URL}/products`
-          );
+    try {
+      setLoading(true);
 
-        setProducts(
-          res.data
-        );
+      await axios.post(
+        "/api/cart/add",
+        {
+          userId: user._id,
+          product: {
+            productId: id,
+            name,
+            price,
+            image: image.replace(
+              `${import.meta.env.VITE_API_URL.replace(
+                "/api",
+                ""
+              )}/uploads/`,
+              ""
+            ),
+            qty: 1,
+          },
+        }
+      );
 
-      } catch (error) {
-        console.log(error);
+      setMessage("Added to cart");
 
-      } finally {
-        setLoading(false);
-      }
-    };
+      window.dispatchEvent(
+        new Event("cartUpdated")
+      );
 
-  
-  // now filter by search + category
-  const filteredProducts =
-    products.filter(
-      (item) => {
-        const matchSearch =
-          item.name
-            .toLowerCase()
-            .includes(
-              search.toLowerCase()
-            );
-
-        const matchCategory =
-          selectedCategory
-            ? item.category ===
-              selectedCategory
-            : true;
-
-        return (
-          matchSearch &&
-          matchCategory
-        );
-      }
-    );
+    } catch (error) {
+      setMessage(
+        "Something went wrong"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <>
-      <Navbar />
+    <div className="bg-white border rounded-2xl p-4 shadow-sm">
 
-      <section className="px-4 md:px-6 py-10">
-        <div className="max-w-7xl mx-auto">
+      <Link to={`/products/${id}`}>
+        <img
+          src={image}
+          alt={name}
+          className="w-full h-44 object-cover rounded-xl"
+        />
 
-          {/* Search */}
-          <div className="max-w-2xl mx-auto mt-10">
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="w-full border rounded-xl px-4 py-3 outline-none focus:border-green-600"
-              value={search}
-              onChange={(e) =>
-                setSearch(
-                  e.target.value
-                )
-              }
-            />
-          </div>
+        <p className="text-sm text-gray-500 mt-4">
+          {category}
+        </p>
 
-          {/* Loading */}
-          {loading ? (
-            <p className="text-center mt-10">
-              Loading...
-            </p>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+        <h3 className="font-bold text-lg">
+          {name}
+        </h3>
+      </Link>
 
-              {filteredProducts.length >
-              0 ? (
+      <div className="flex gap-1 text-yellow-500 mt-2">
+        <FaStar />
+        <FaStar />
+        <FaStar />
+        <FaStar />
+        <FaStar />
+      </div>
 
-                filteredProducts.map(
-                  (item) => (
-                    <ProductCard
-                      key={
-                        item._id
-                      }
-                      id={
-                        item._id
-                      }
-                      name={
-                        item.name
-                      }
-                      category={
-                        item.category
-                      }
-                      price={
-                        item.price
-                      }
-                      image={`${import.meta.env.VITE_API_URL.replace('/api','')}/uploads/${item.image}`}
-                    />
-                  )
-                )
+      <p className="text-green-600 text-2xl font-bold mt-3">
+        Rs {price}
+      </p>
 
-              ) : (
-                <p className="text-center col-span-full text-gray-500">
-                  No products found
-                </p>
-              )}
+      <button
+        onClick={addToCart}
+        disabled={loading}
+        className="w-full mt-4 bg-green-600 text-white py-2 rounded-xl"
+      >
+        <FaShoppingCart className="inline mr-2" />
 
-            </div>
-          )}
+        {loading
+          ? "Adding..."
+          : "Add To Cart"}
+      </button>
 
-        </div>
-      </section>
+      {message && (
+        <p className="text-red-500 text-sm mt-2 text-center">
+          {message}
+        </p>
+      )}
 
-      <Footer />
-    </>
+    </div>
   );
 }

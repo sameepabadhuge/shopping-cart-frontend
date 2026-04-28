@@ -51,7 +51,7 @@ export default function ProductCard({
       setLoading(true);
 
       await axios.post(
-        "/cart/add",
+        "/api/cart/add",
         {
           userId: user._id,
           product: {
@@ -59,7 +59,10 @@ export default function ProductCard({
             name,
             price,
             image: image.replace(
-              `${import.meta.env.VITE_API_URL.replace("/api","")}/uploads/`,
+              `${import.meta.env.VITE_API_URL.replace(
+                "/api",
+                ""
+              )}/uploads/`,
               ""
             ),
             qty: 1,
@@ -67,16 +70,11 @@ export default function ProductCard({
         }
       );
 
-     
-
       setMessage("Added to cart");
 
       window.dispatchEvent(
-      new Event("cartUpdated")
+        new Event("cartUpdated")
       );
-
-
-
 
     } catch (error) {
       setMessage(

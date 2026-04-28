@@ -1,16 +1,141 @@
-# React + Vite
+# Shopping Cart Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the React user interface for the shopping cart application. It lets users browse products, view details, manage cart items, and access authentication flows. It also includes the admin interface for managing products and categories.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### User Experience
 
-## React Compiler
+- Browse products by category
+- View product details
+- Add items to cart
+- Increase or decrease quantity in cart
+- Remove items from cart
+- View checkout summary
+- Register and log in
+- Access profile settings and security pages
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Admin Experience
 
-## Expanding the ESLint configuration
+- Admin login
+- Dashboard overview
+- Manage products
+- Manage categories
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Authentication
+
+- Google login
+- Facebook login
+- Passkey support
+- Protected routes for user and admin pages
+
+## Technology Stack
+
+- React
+- Vite
+- React Router
+- Axios
+- Tailwind CSS
+- React Hot Toast
+- SimpleWebAuthn browser client
+
+## Project Structure
+
+```text
+frontend/
+├── index.html
+├── package.json
+├── vite.config.js
+├── tailwind.config.js
+├── postcss.config.js
+├── eslint.config.js
+├── public/
+│   └── images/
+└── src/
+    ├── App.jsx
+    ├── App.css
+    ├── index.css
+    ├── main.jsx
+    ├── components/
+    │   ├── CategoryCard.jsx
+    │   ├── Footer.jsx
+    │   ├── Navbar.jsx
+    │   ├── ProductCard.jsx
+    │   └── admin/
+    │       ├── AdminSidebar.jsx
+    │       └── StatCard.jsx
+    ├── context/
+    │   └── AuthContext.jsx
+    ├── layouts/
+    │   └── AdminLayout.jsx
+    ├── pages/
+    │   ├── admin/
+    │   │   ├── AdminLogin.jsx
+    │   │   ├── Dashboard.jsx
+    │   │   ├── ManageCategories.jsx
+    │   │   └── ManageProducts.jsx
+    │   └── user/
+    │       ├── Cart.jsx
+    │       ├── Checkout.jsx
+    │       ├── Home.jsx
+    │       ├── Login.jsx
+    │       ├── OrderSuccess.jsx
+    │       ├── ProductDetails.jsx
+    │       ├── Products.jsx
+    │       ├── Register.jsx
+    │       └── profile/
+    │           ├── Security.jsx
+    │           └── Settings.jsx
+    ├── routes/
+    │   └── AppRoutes.jsx
+    ├── services/
+    │   └── authService.js
+    └── utils/
+        └── axiosInstance.js
+```
+
+## Main Flow
+
+1. The app starts in `src/main.jsx`.
+2. `BrowserRouter` and `AuthProvider` wrap the application.
+3. `src/routes/AppRoutes.jsx` handles public, protected user, and admin routes.
+4. Product browsing and cart actions use the backend API through `src/utils/axiosInstance.js`.
+
+## Setup
+
+### Prerequisites
+
+- Node.js
+- A running backend API
+
+### Install and Run
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Environment Variables
+
+The frontend expects the backend API URL through:
+
+- `VITE_API_URL`
+
+Example:
+
+```env
+VITE_API_URL=http://localhost:5000/api
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+## Notes
+
+- The frontend is responsive for desktop and mobile browsers.
+- Authentication and protected navigation are handled through the shared auth context.
+- Cart totals are updated dynamically from cart data returned by the backend.

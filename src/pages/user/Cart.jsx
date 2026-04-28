@@ -51,7 +51,7 @@ export default function Cart() {
 
         const res =
           await axios.get(
-            `/cart/${user._id}`
+            `/api/cart/${user._id}`
           );
 
         setCartItems(
@@ -107,7 +107,7 @@ export default function Cart() {
     ) => {
       try {
         await axios.put(
-          "/cart/update",
+          "/api/cart/update",
           {
             userId:
               user._id,
@@ -134,7 +134,7 @@ export default function Cart() {
 
       try {
         await axios.put(
-          "/cart/update",
+          "/api/cart/update",
           {
             userId:
               user._id,
@@ -156,7 +156,7 @@ export default function Cart() {
     async (productId) => {
       try {
         await axios.delete(
-          "/cart/remove",
+          "/api/cart/remove",
           {
             data: {
               userId:
@@ -242,7 +242,7 @@ export default function Cart() {
                     >
 
                       <img
-                        src={`http://localhost:5000/uploads/${item.image}`}
+                        src={`${import.meta.env.VITE_API_URL}/uploads/${item.image}`}
                         alt={
                           item.name
                         }
@@ -341,13 +341,14 @@ export default function Cart() {
                 </div>
 
                 <button
-                onClick={() =>
-                   navigate("/checkout")
-                }
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl"
+                  onClick={() =>
+                    navigate("/checkout")
+                  }
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl"
                 >
-                   Checkout
+                  Checkout
                 </button>
+
               </div>
 
             </div>

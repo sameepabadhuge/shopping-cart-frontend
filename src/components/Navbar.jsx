@@ -40,7 +40,7 @@ export default function Navbar() {
 
         const res =
           await axios.get(
-            `/cart/${user._id}`
+            `/api/cart/${user._id}`
           );
 
         const totalQty =
